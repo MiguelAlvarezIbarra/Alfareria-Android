@@ -11,6 +11,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 // ─── Envío de mensajes al Wear OS ───
+// Implementa la navegación phone-watch: cada "path" enviado aquí es escuchado
+// por PhoneMessageListenerService en el módulo wear, que abre la Activity
+// correspondiente (StockAlertActivity, CompraAlertActivity, etc.) usando
+// el Wearable Data Layer API de Google Play Services.
 @Singleton
 class WearDataSender @Inject constructor(
     @ApplicationContext private val context: Context
