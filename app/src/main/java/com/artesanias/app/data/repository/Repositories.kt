@@ -93,6 +93,8 @@ class ProductoRepository @Inject constructor(
         return true
     }
 
+    // Integra la alerta de stock bajo con Wear OS: persiste la notificación
+    // localmente y la envía al reloj por el path "/alerta/stock".
     private suspend fun notificarStockBajo(producto: Producto) {
         // Formato "productoId:nombre:stock" para que el reloj pueda parsearlo
         val msgWear = "${producto.id}:${producto.nombre}:${producto.stock}"
@@ -179,7 +181,8 @@ class OrdenRepository @Inject constructor(
                             datos = """{"ordenId":$ordenId,"total":$total}"""
                         )
                     )
-                    // Enviar mensaje con detalle y stock resultante
+                    // Enviar mensaje con detalle y stock resultante.
+                    // El reloj abre CompraAlertActivity con este payload extendido.
                     wearSender.enviarMensaje("/alerta/compra-grande",
                         "$msg||detalle=$detalleProductos||stockBajo=$stockBajoPayload")
                 }
