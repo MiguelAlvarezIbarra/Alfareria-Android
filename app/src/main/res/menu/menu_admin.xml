@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/adminDashboardFragment" android:title="Inicio"     android:icon="@drawable/ic_home"/>
+    <item android:id="@+id/adminProductosFragment" android:title="Inventario" android:icon="@drawable/ic_inventory"/>
+    <item android:id="@+id/adminUsuariosFragment"  android:title="Usuarios"   android:icon="@drawable/ic_people"/>
+    <item android:id="@+id/camaraFragment"         android:title="Cámara"     android:icon="@drawable/ic_camera"/>
+</menu>

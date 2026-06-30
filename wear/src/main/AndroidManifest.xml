@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
+    <uses-feature android:name="android.hardware.type.watch" />
+
+    <application
+        android:name=".WearApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="Artesanías Wear"
+        android:theme="@android:style/Theme.DeviceDefault">
+
+        <uses-library android:name="com.google.android.wearable"
+            android:required="false" />
+
+        <meta-data android:name="com.google.android.wearable.standalone"
+            android:value="false" />
+
+        <activity
+            android:name=".presentation.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".presentation.StockListActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".presentation.StockAlertActivity"
+            android:exported="true" />
+
+        <activity
+            android:name=".presentation.CompraAlertActivity"
+            android:exported="true" />
+
+        <activity
+            android:name=".presentation.StockResultadoActivity"
+            android:exported="false" />
+
+        <!-- Listener de mensajes desde el teléfono -->
+        <!-- IMPORTANTE: cada pathPrefix necesita su propio intent-filter -->
+        <service
+            android:name=".data.PhoneMessageListenerService"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/alerta" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/stock" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/orden" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.MESSAGE_RECEIVED" />
+                <data android:scheme="wear" android:host="*" android:pathPrefix="/ping" />
+            </intent-filter>
+
+        </service>
+
+    </application>
+</manifest>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!-- Círculo verde de fondo -->
+    <path
+        android:pathData="M12,2 A10,10 0 1,1 12,22 A10,10 0 1,1 12,2 Z"
+        android:fillColor="#2E7D32"/>
+
+    <!-- Símbolo de moneda $ -->
+    <path
+        android:pathData="M12,5 L12,7 M12,17 L12,19 M12,7 Q9,7 9,10 Q9,12 12,12 Q15,12 15,15 Q15,17 12,17 Q9,17 9,15 M9,9 Q10,7 12,7 M15,16 Q14,17 12,17"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent"/>
+
+</vector>

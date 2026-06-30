@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Artesanías Wear</string>
+    <string name="titulo_stock_bajo">⚠️ Stock Bajo</string>
+    <string name="titulo_compra_grande">💰 Compra Grande</string>
+    <string name="titulo_compra_confirmacion">⚡ Confirmación Requerida</string>
+    <string name="btn_agregar_stock">✓ Agregar Stock</string>
+    <string name="btn_confirmar">✓ Confirmar Orden</string>
+    <string name="btn_cancelar">Cancelar</string>
+    <string name="btn_desestimar">Desestimar</string>
+    <string name="btn_ping">Verificar conexión</string>
+    <string name="btn_mostrar_qr">Ver QR de conexión</string>
+    <string name="estado_conectado">✓ Teléfono conectado</string>
+    <string name="estado_desconectado">Sin conexión al teléfono</string>
+    <string name="cantidad_hint">20</string>
+    <string name="channel_id">artesanias_wear_channel</string>
+    <string name="channel_name">Alertas de Artesanías</string>
+</resources>

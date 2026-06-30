@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.wear.widget.BoxInsetLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0D1B2A"
+    android:padding="8dp">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:boxedEdges="all">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="12dp">
+
+            <!-- Icono dinámico: ✅ o ⚠️ según resultado -->
+            <TextView
+                android:id="@+id/tv_resultado_icono"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✅"
+                android:textSize="32sp"
+                android:gravity="center"
+                android:layout_gravity="center"/>
+
+            <!-- Título: "Stock suficiente" o "Stock bajo" -->
+            <TextView
+                android:id="@+id/tv_resultado_titulo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Stock suficiente"
+                android:textColor="#F5E6D3"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_marginTop="6dp"/>
+
+            <!-- Detalle de productos con stock bajo (solo visible si hay stock bajo) -->
+            <TextView
+                android:id="@+id/tv_resultado_detalle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#FFCC80"
+                android:textSize="10sp"
+                android:gravity="center"
+                android:layout_marginTop="8dp"
+                android:visibility="gone"/>
+
+            <!-- Aceptar: "Cerrar" si todo bien, "Aceptar → Agregar" si hay stock bajo -->
+            <Button
+                android:id="@+id/btn_resultado_aceptar"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:text="Cerrar"
+                android:textSize="11sp"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#1B5E20"
+                android:layout_marginTop="14dp"/>
+
+            <!-- Cancelar: solo visible si hay stock bajo -->
+            <Button
+                android:id="@+id/btn_resultado_cancelar"
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:text="Cancelar"
+                android:textSize="10sp"
+                android:textColor="#A0887A"
+                android:backgroundTint="#1A2020"
+                android:layout_marginTop="4dp"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+    </ScrollView>
+</androidx.wear.widget.BoxInsetLayout>

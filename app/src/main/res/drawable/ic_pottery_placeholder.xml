@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="96dp"
+    android:height="96dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+
+    <!-- Cuerpo de la vasija -->
+    <path
+        android:pathData="M32,28 Q24,40 24,55 Q24,72 36,78 L60,78 Q72,72 72,55 Q72,40 64,28 Z"
+        android:fillColor="#8D6E63"/>
+
+    <!-- Cuello de la vasija -->
+    <path
+        android:pathData="M36,28 Q38,20 48,18 Q58,20 60,28 Z"
+        android:fillColor="#795548"/>
+
+    <!-- Boca de la vasija -->
+    <path
+        android:pathData="M38,18 Q48,14 58,18 Q58,22 48,22 Q38,22 38,18 Z"
+        android:fillColor="#6D4C41"/>
+
+    <!-- Decoración geométrica talavera -->
+    <path
+        android:pathData="M34,42 L62,42 L62,46 L34,46 Z"
+        android:fillColor="#E64A19"
+        android:fillAlpha="0.7"/>
+    <path
+        android:pathData="M30,56 L66,56 L66,60 L30,60 Z"
+        android:fillColor="#1565C0"
+        android:fillAlpha="0.6"/>
+
+    <!-- Patrón de flores -->
+    <path
+        android:pathData="M44,50 Q48,46 52,50 Q48,54 44,50 Z"
+        android:fillColor="#F9A825"
+        android:fillAlpha="0.8"/>
+
+    <!-- Base de la vasija -->
+    <path
+        android:pathData="M36,78 Q48,82 60,78 L62,80 Q48,85 34,80 Z"
+        android:fillColor="#5D4037"/>
+
+</vector>

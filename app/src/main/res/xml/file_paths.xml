@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <external-files-path name="artesanias_images" path="artesanias/"/>
+    <files-path name="internal_images" path="artesanias/"/>
+</paths>

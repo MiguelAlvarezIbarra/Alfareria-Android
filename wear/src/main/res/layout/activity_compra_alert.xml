@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.wear.widget.BoxInsetLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0D2010"
+    android:padding="8dp">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:boxedEdges="all">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💰"
+                android:textSize="28sp"
+                android:gravity="center"
+                android:layout_gravity="center"/>
+
+            <TextView
+                android:id="@+id/tv_titulo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="COMPRA GRANDE"
+                android:textColor="#66BB6A"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_marginTop="4dp"/>
+
+            <TextView
+                android:id="@+id/tv_mensaje"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Se realizó una venta importante"
+                android:textColor="#F5E6D3"
+                android:textSize="11sp"
+                android:gravity="center"
+                android:layout_marginTop="6dp"/>
+
+            <!-- NUEVO: detalle de productos comprados -->
+            <TextView
+                android:id="@+id/tv_detalle_productos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#A5D6A7"
+                android:textSize="10sp"
+                android:gravity="start"
+                android:layout_marginTop="8dp"
+                android:background="#1A3A1A"
+                android:padding="6dp"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/tv_aviso_confirmacion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="⚡ Requiere tu confirmación"
+                android:textColor="#FFB300"
+                android:textSize="10sp"
+                android:gravity="center"
+                android:layout_marginTop="6dp"
+                android:visibility="gone"/>
+
+            <Button
+                android:id="@+id/btn_confirmar"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:text="✓ Confirmar"
+                android:textSize="11sp"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#1B5E20"
+                android:layout_marginTop="12dp"/>
+
+            <Button
+                android:id="@+id/btn_desestimar"
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:text="Desestimar"
+                android:textSize="10sp"
+                android:textColor="#A0887A"
+                android:backgroundTint="#1A2C1A"
+                android:layout_marginTop="4dp"/>
+
+        </LinearLayout>
+    </ScrollView>
+</androidx.wear.widget.BoxInsetLayout>

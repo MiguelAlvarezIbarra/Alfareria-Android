@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_margin="4dp" app:cardElevation="2dp" app:cardCornerRadius="8dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <ImageView android:id="@+id/iv_producto" android:layout_width="match_parent"
+            android:layout_height="140dp" android:scaleType="centerCrop"
+            android:background="#E8E0D5"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="8dp">
+            <TextView android:id="@+id/tv_nombre" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:textStyle="bold" android:textSize="13sp"
+                android:maxLines="2" android:ellipsize="end"/>
+            <TextView android:id="@+id/tv_tecnica" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:textSize="11sp" android:textColor="#8D6E63"/>
+            <TextView android:id="@+id/tv_origen" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:textSize="11sp" android:textColor="#9E9E9E"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical"
+                android:layout_marginTop="4dp">
+                <TextView android:id="@+id/tv_precio" android:layout_width="0dp"
+                    android:layout_height="wrap_content" android:layout_weight="1"
+                    android:textStyle="bold" android:textSize="14sp" android:textColor="#5D4037"/>
+                <TextView android:id="@+id/tv_stock" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:textSize="10sp"/>
+            </LinearLayout>
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_agregar"
+                android:layout_width="match_parent" android:layout_height="36dp"
+                android:text="Agregar" android:textSize="12sp" android:layout_marginTop="6dp"/>
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

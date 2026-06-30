@@ -1,0 +1,66 @@
+# ─── Archivos compilados ───
+*.apk
+*.aar
+*.ap_
+*.aab
+*.dex
+*.class
+
+# ─── Gradle ───
+.gradle/
+build/
+**/build/
+
+# ─── Archivos locales (ruta del SDK, keystore local) ───
+local.properties
+*.jks
+*.keystore
+
+# ─── Android Studio / IntelliJ ───
+*.iml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries
+.idea/libraries/
+.idea/caches/
+.idea/modules.xml
+.idea/navEditor.xml
+.idea/deploymentTargetDropDown.xml
+.idea/.name
+captures/
+.navigation/
+
+# ─── Kotlin ───
+.kotlin/
+
+# ─── Archivos generados ───
+bin/
+gen/
+out/
+/out/
+release/
+
+# ─── Logs ───
+*.log
+hs_err_pid*
+
+# ─── macOS ───
+.DS_Store
+.Spotlight-V100
+.Trashes
+
+# ─── Windows ───
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ─── Linux ───
+*~
+
+# ─── ProGuard ───
+proguard/
+
+# ─── KSP / KAPT generados ───
+**/generated/

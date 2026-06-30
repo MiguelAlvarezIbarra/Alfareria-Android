@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="@android:style/Theme.DeviceDefault">
+        <item name="android:colorPrimary">#5D4037</item>
+        <item name="android:colorPrimaryDark">#3E2723</item>
+        <item name="android:colorAccent">#FF7043</item>
+        <item name="android:windowBackground">#1A0E08</item>
+        <item name="android:textColorPrimary">#F5E6D3</item>
+        <item name="android:textColorSecondary">#A0887A</item>
+    </style>
+
+    <style name="AppTheme.Alert" parent="@android:style/Theme.DeviceDefault">
+        <item name="android:colorPrimary">#FF6F00</item>
+        <item name="android:colorPrimaryDark">#E65100</item>
+        <item name="android:colorAccent">#FFAB40</item>
+        <item name="android:windowBackground">#2C1810</item>
+        <item name="android:textColorPrimary">#F5E6D3</item>
+    </style>
+
+    <style name="AppTheme.Purchase" parent="@android:style/Theme.DeviceDefault">
+        <item name="android:colorPrimary">#2E7D32</item>
+        <item name="android:colorPrimaryDark">#1B5E20</item>
+        <item name="android:colorAccent">#66BB6A</item>
+        <item name="android:windowBackground">#0D2010</item>
+        <item name="android:textColorPrimary">#F5E6D3</item>
+    </style>
+</resources>

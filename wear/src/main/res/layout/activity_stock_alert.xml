@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.wear.widget.BoxInsetLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#2C1810"
+    android:padding="8dp">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:boxedEdges="all">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚠️"
+                android:textSize="28sp"
+                android:gravity="center"
+                android:layout_gravity="center"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="STOCK BAJO"
+                android:textColor="#FF7043"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_marginTop="4dp"/>
+
+            <TextView
+                android:id="@+id/tv_mensaje"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Producto con stock bajo"
+                android:textColor="#F5E6D3"
+                android:textSize="11sp"
+                android:gravity="center"
+                android:layout_marginTop="6dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Agregar stock:"
+                android:textColor="#A0887A"
+                android:textSize="10sp"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center"/>
+
+            <EditText
+                android:id="@+id/et_cantidad"
+                android:layout_width="80dp"
+                android:layout_height="40dp"
+                android:hint="20"
+                android:inputType="number"
+                android:imeOptions="actionDone"
+                android:maxLines="1"
+                android:gravity="center"
+                android:textColor="#F5E6D3"
+                android:textColorHint="#5D4037"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:background="@android:color/transparent"
+                android:layout_gravity="center"
+                android:layout_marginTop="4dp"/>
+
+            <Button
+                android:id="@+id/btn_agregar_stock"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:text="✓ Agregar stock"
+                android:textSize="11sp"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#2E7D32"
+                android:layout_marginTop="8dp"/>
+
+            <Button
+                android:id="@+id/btn_cancelar"
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:text="Cancelar"
+                android:textSize="10sp"
+                android:textColor="#A0887A"
+                android:backgroundTint="#3E2723"
+                android:layout_marginTop="4dp"/>
+
+        </LinearLayout>
+    </ScrollView>
+</androidx.wear.widget.BoxInsetLayout>

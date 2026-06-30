@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="4dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:padding="12dp" android:gravity="center_vertical">
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content"
+            android:layout_weight="1" android:orientation="vertical">
+            <TextView android:id="@+id/tv_nombre" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:textStyle="bold" android:textSize="14sp"/>
+            <TextView android:id="@+id/tv_precio_unit" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:textSize="12sp"/>
+            <TextView android:id="@+id/tv_subtotal" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:textStyle="bold" android:textColor="#5D4037"/>
+        </LinearLayout>
+        <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:gravity="center_vertical">
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_menos"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="36dp" android:layout_height="36dp" android:text="−" android:textSize="18sp"/>
+            <TextView android:id="@+id/tv_cantidad" android:layout_width="36dp"
+                android:layout_height="wrap_content" android:gravity="center"
+                android:text="1" android:textStyle="bold"/>
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_mas"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="36dp" android:layout_height="36dp" android:text="+" android:textSize="18sp"/>
+            <com.google.android.material.button.MaterialButton android:id="@+id/btn_eliminar"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="36dp" android:layout_height="36dp" android:text="🗑" android:textSize="16sp"/>
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

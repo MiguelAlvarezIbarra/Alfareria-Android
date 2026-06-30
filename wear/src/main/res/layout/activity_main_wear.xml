@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.wear.widget.BoxInsetLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1A0E08"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        app:boxedEdges="all"
+        android:padding="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🏺"
+            android:textSize="28sp"
+            android:gravity="center"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Artesanías"
+            android:textColor="#F5E6D3"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:layout_marginTop="2dp"/>
+
+        <TextView
+            android:id="@+id/tv_estado"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Esperando conexión..."
+            android:textColor="#A0887A"
+            android:textSize="10sp"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="8dp"/>
+
+        <Button
+            android:id="@+id/btn_ping"
+            android:layout_width="match_parent"
+            android:layout_height="34dp"
+            android:text="Verificar conexión"
+            android:textSize="10sp"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#5D4037"/>
+
+        <Button
+            android:id="@+id/btn_ajustar_inventario"
+            android:layout_width="match_parent"
+            android:layout_height="34dp"
+            android:text="⚠ Ajustar Inventario"
+            android:textSize="10sp"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#C62828"
+            android:layout_marginTop="4dp"/>
+
+        <Button
+            android:id="@+id/btn_mostrar_qr"
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:text="Ver QR conexión"
+            android:textSize="9sp"
+            android:textColor="#A0887A"
+            android:backgroundTint="#2A1A10"
+            android:layout_marginTop="4dp"/>
+
+    </LinearLayout>
+</androidx.wear.widget.BoxInsetLayout>

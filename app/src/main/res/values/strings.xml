@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Artesanías MX</string>
+    <string name="canal_nombre">Notificaciones Artesanías</string>
+    <string name="canal_descripcion">Alertas de stock y compras</string>
+</resources>

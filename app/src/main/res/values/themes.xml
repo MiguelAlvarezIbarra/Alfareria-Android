@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.ArtesaniasApp" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#5D4037</item>
+        <item name="colorPrimaryVariant">#3E2723</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#FF8F00</item>
+        <item name="colorSecondaryVariant">#FF6F00</item>
+        <item name="colorOnSecondary">#000000</item>
+    </style>
+</resources>

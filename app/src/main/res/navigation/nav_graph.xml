@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/loginFragment">
+
+    <!-- ── AUTH ── -->
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.artesanias.app.ui.auth.LoginFragment"
+        android:label="Iniciar sesión"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_login_to_registro"
+            app:destination="@id/registroFragment" />
+        <action
+            android:id="@+id/action_login_to_admin"
+            app:destination="@id/adminDashboardFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_login_to_tienda"
+            app:destination="@id/tiendaFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/registroFragment"
+        android:name="com.artesanias.app.ui.auth.RegistroFragment"
+        android:label="Crear cuenta"
+        tools:layout="@layout/fragment_registro" />
+
+    <!-- ── ADMIN ── -->
+    <fragment
+        android:id="@+id/adminDashboardFragment"
+        android:name="com.artesanias.app.ui.admin.AdminDashboardFragment"
+        android:label="Panel Admin"
+        tools:layout="@layout/fragment_admin_dashboard">
+        <action
+            android:id="@+id/action_dashboard_to_productos"
+            app:destination="@id/adminProductosFragment" />
+        <action
+            android:id="@+id/action_dashboard_to_usuarios"
+            app:destination="@id/adminUsuariosFragment" />
+        <action
+            android:id="@+id/action_dashboard_to_camara"
+            app:destination="@id/camaraFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminProductosFragment"
+        android:name="com.artesanias.app.ui.admin.AdminProductosFragment"
+        android:label="Inventario"
+        tools:layout="@layout/fragment_admin_productos">
+        <action
+            android:id="@+id/action_adminProductos_to_editarProducto"
+            app:destination="@id/editarProductoFragment">
+            <argument
+                android:name="producto"
+                app:argType="com.artesanias.app.data.model.Producto"
+                app:nullable="true"
+                android:defaultValue="@null" />
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/adminUsuariosFragment"
+        android:name="com.artesanias.app.ui.admin.AdminUsuariosFragment"
+        android:label="Usuarios" />
+
+    <fragment
+        android:id="@+id/editarProductoFragment"
+        android:name="com.artesanias.app.ui.admin.EditarProductoFragment"
+        android:label="Producto">
+        <argument
+            android:name="producto"
+            app:argType="com.artesanias.app.data.model.Producto"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="imagenPath"
+            app:argType="string"
+            android:defaultValue="" />
+    </fragment>
+
+    <!-- ── CÁMARA ── -->
+    <fragment
+        android:id="@+id/camaraFragment"
+        android:name="com.artesanias.app.ui.camera.CamaraFragment"
+        android:label="Cámara">
+        <action
+            android:id="@+id/action_camara_to_nuevoProducto"
+            app:destination="@id/editarProductoFragment">
+            <argument
+                android:name="imagenPath"
+                app:argType="string"
+                android:defaultValue="" />
+        </action>
+    </fragment>
+
+    <!-- ── TIENDA CLIENTE ── -->
+    <fragment
+        android:id="@+id/tiendaFragment"
+        android:name="com.artesanias.app.ui.store.TiendaFragment"
+        android:label="Tienda"
+        tools:layout="@layout/fragment_tienda" />
+
+    <fragment
+        android:id="@+id/carritoFragment"
+        android:name="com.artesanias.app.ui.store.CarritoFragment"
+        android:label="Carrito"
+        tools:layout="@layout/fragment_carrito" />
+
+    <fragment
+        android:id="@+id/misOrdenesFragment"
+        android:name="com.artesanias.app.ui.store.MisOrdenesFragment"
+        android:label="Mis órdenes" />
+
+</navigation>
