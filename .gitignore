@@ -1,5 +1,6 @@
 # ─── Archivos compilados ───
 *.apk
+!apk/*.apk
 *.aar
 *.ap_
 *.aab
