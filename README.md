@@ -3,6 +3,22 @@
 Aplicación Android completa para tienda de artesanías y alfarería, con módulo para Wear OS que notifica al administrador sobre stock bajo y compras grandes.
 
 ---
+# Información del equipo
+
+**Integrantes:**
+- Miguel Ángel Álvarez Ibarra
+- Claudio Ángel Huerta Ducoing
+- Pedro Uriel Perez Monzón
+
+**Grupo:** GIDS6092
+
+---
+
+## 🎯 Objetivo
+
+Desarrollar una aplicación Android para la gestión y venta de artesanías y productos de alfarería que permita a los clientes explorar el catálogo, realizar compras y consultar sus pedidos, mientras que los administradores puedan gestionar productos, usuarios e inventario. Además, integrar un módulo para Wear OS que facilite el monitoreo del negocio mediante notificaciones de stock bajo, compras importantes y acciones remotas desde un reloj inteligente.
+
+---
 
 ## 📋 Características
 
