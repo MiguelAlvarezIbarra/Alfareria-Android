@@ -183,6 +183,26 @@ UI (Fragment) ←→ ViewModel ←→ Repository ←→ DAO / WearDataSender
 
 ---
 
+## 🖼️ Capturas de pantalla
+
+### ⌚ Módulo Wear OS
+
+| Pantalla principal | Lista de stock bajo | Alerta de stock bajo |
+|---|---|---|
+| ![Pantalla principal](evidencias/wear_01_pantalla_principal.png) | ![Lista stock bajo](evidencias/wear_02_lista_stock_bajo.png) | ![Alerta stock bajo](evidencias/wear_03_alerta_stock_bajo.png) |
+
+| Agregar stock | Alerta de compra grande | Confirmar compra |
+|---|---|---|
+| ![Agregar stock](evidencias/wear_04_agregar_stock.png) | ![Compra grande](evidencias/wear_05_alerta_compra_grande.png) | ![Confirmar compra](evidencias/wear_06_confirmar_compra.png) |
+
+| Confirmar / Desestimar | Orden confirmada | Stock suficiente |
+|---|---|---|
+| ![Botones confirmar](evidencias/wear_07_confirmar_compra_botones.png) | ![Orden confirmada](evidencias/wear_08_orden_confirmada.png) | ![Stock suficiente](evidencias/wear_09_stock_suficiente.png) |
+
+> Más capturas disponibles en la carpeta [`evidencias/`](evidencias/).
+
+---
+
 ## 🎨 Paleta de colores
 
 | Color | Hex | Uso |
