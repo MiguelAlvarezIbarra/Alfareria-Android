@@ -33,24 +33,39 @@ class MainActivity : AppCompatActivity() {
         binding.navVideo.setOnClickListener { mostrarPantalla(VideoFragment(), binding.navVideo) }
 
         // El overlay escucha el evento global sin importar qué Fragment esté
-        // activo: por eso vive en la Activity y no en cada pantalla.
+        // activo: por eso vive en la Activity y no en cada pantalla. Se usa
+        // un Dialog (ventana propia) en vez de alternar la visibilidad de un
+        // View hijo: es el patrón más confiable para "mostrar algo encima
+        // de todo" y evita depender de que el layout padre recalcule bien
+        // un View que arrancó en GONE.
         lifecycleScope.launch {
             TvDataStore.compraGrandeEvents.collect { evento ->
-                val formatoMoneda = NumberFormat.getCurrencyInstance(Locale("es", "MX"))
-                binding.txtOverlayProducto.text = evento.producto
-                binding.txtOverlayMonto.text = "${formatoMoneda.format(evento.monto)} MXN"
-                binding.overlayCompraGrande.visibility = android.view.View.VISIBLE
-                ocultarOverlay.removeCallbacksAndMessages(null)
-                ocultarOverlay.postDelayed(8000) {
-                    binding.overlayCompraGrande.visibility = android.view.View.GONE
-                }
+                mostrarNotificacionCompraGrande(evento)
             }
         }
+    }
 
-        binding.overlayCompraGrande.setOnClickListener {
-            ocultarOverlay.removeCallbacksAndMessages(null)
-            binding.overlayCompraGrande.visibility = android.view.View.GONE
+    private var dialogoCompraGrande: android.app.Dialog? = null
+
+    private fun mostrarNotificacionCompraGrande(evento: com.artesanias.tv.data.TvCompraGrandeEvent) {
+        dialogoCompraGrande?.dismiss()
+        ocultarOverlay.removeCallbacksAndMessages(null)
+
+        val formatoMoneda = NumberFormat.getCurrencyInstance(Locale("es", "MX"))
+        val dialogBinding = com.artesanias.tv.databinding.DialogCompraGrandeBinding.inflate(layoutInflater)
+        dialogBinding.txtOverlayProducto.text = evento.producto
+        dialogBinding.txtOverlayMonto.text = "${formatoMoneda.format(evento.monto)} MXN"
+
+        val dialog = android.app.Dialog(this, android.R.style.Theme_Translucent_NoTitleBar).apply {
+            setContentView(dialogBinding.root)
+            setCancelable(true)
+            setOnDismissListener { dialogoCompraGrande = null }
         }
+        dialogBinding.root.setOnClickListener { dialog.dismiss() }
+        dialogoCompraGrande = dialog
+        dialog.show()
+
+        ocultarOverlay.postDelayed(8000) { dialog.dismiss() }
     }
 
     private fun mostrarPantalla(fragment: Fragment, itemSeleccionado: android.view.View) {

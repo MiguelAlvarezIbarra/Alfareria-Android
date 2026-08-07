@@ -45,6 +45,17 @@ class VideoFragment : Fragment() {
             setAnchorView(binding.videoView)
         })
         binding.videoView.setOnPreparedListener { it.isLooping = true }
+        binding.videoView.setOnErrorListener { _, _, _ ->
+            // Evita el diálogo genérico del sistema si el decodificador del
+            // dispositivo no soporta el códec del archivo (frecuente en
+            // emuladores x86 con video grabado en H.265/HEVC).
+            binding.videoView.visibility = View.GONE
+            binding.txtVideoPendiente.visibility = View.VISIBLE
+            binding.txtVideoPendiente.text =
+                "⚠️ Este dispositivo no puede reproducir el video (códec no soportado).\n" +
+                "Prueba con un MP4 en H.264."
+            true
+        }
         binding.videoView.start()
     }
 

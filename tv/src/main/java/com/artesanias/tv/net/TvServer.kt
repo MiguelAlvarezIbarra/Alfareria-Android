@@ -110,12 +110,14 @@ object TvServer {
             }
 
             "compra_grande" -> {
+                Log.i(TAG, "compra_grande recibido: $linea")
                 TvDataStore.emitirCompraGrande(
                     TvCompraGrandeEvent(
                         producto = json.getString("producto"),
                         monto = json.getDouble("monto")
                     )
                 )
+                Log.i(TAG, "compra_grande emitido a TvDataStore")
             }
 
             else -> Log.w(TAG, "Tipo de mensaje desconocido: $linea")
