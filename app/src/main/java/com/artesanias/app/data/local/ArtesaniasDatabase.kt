@@ -1,13 +1,12 @@
 package com.artesanias.app.data.local
 
+import android.content.ContentValues
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.artesanias.app.data.model.*
 import com.artesanias.app.util.HashUtil
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @Database(
     entities = [
@@ -40,114 +39,105 @@ abstract class ArtesaniasDatabase : RoomDatabase() {
                     .addCallback(object : Callback() {
                         override fun onCreate(db: SupportSQLiteDatabase) {
                             super.onCreate(db)
-                            // Pre-poblar con datos de ejemplo
-                            INSTANCE?.let { database ->
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    poblarDatosIniciales(database)
-                                }
-                            }
+                            // Sembrado con SQL crudo sobre el mismo `db` que entrega el
+                            // callback, en vez de usar los DAOs de Room: los DAOs despachan
+                            // su trabajo al executor de transacciones de Room, que procesa
+                            // una tarea a la vez y todavía está "ocupado" ejecutando este
+                            // mismo onCreate, así que llamarlos aquí (incluso con
+                            // runBlocking en otro dispatcher) deadlockea. Con SQL directo el
+                            // sembrado corre síncronamente dentro de esta misma transacción
+                            // de apertura, así que termina antes de que la BD quede
+                            // disponible para cualquier query posterior (p.ej. login).
+                            poblarDatosIniciales(db)
                         }
                     })
                     .build()
                     .also { INSTANCE = it }
             }
 
-        private suspend fun poblarDatosIniciales(db: ArtesaniasDatabase) {
-            // Admin por defecto
-            db.usuarioDao().insertUsuario(
-                Usuario(
-                    nombre = "Administrador",
-                    apellido = "Sistema",
-                    email = "admin@artesanias.mx",
-                    passwordHash = HashUtil.hash("Admin123"),
-                    rol = RolUsuario.ADMIN
-                )
-            )
-            // Cliente de prueba
-            db.usuarioDao().insertUsuario(
-                Usuario(
-                    nombre = "María",
-                    apellido = "González",
-                    email = "cliente@artesanias.mx",
-                    passwordHash = HashUtil.hash("Cliente123"),
-                    rol = RolUsuario.CLIENTE
-                )
-            )
+        private fun poblarDatosIniciales(db: SupportSQLiteDatabase) {
+            fun usuario(nombre: String, apellido: String, email: String, pass: String, rol: RolUsuario) =
+                ContentValues().apply {
+                    put("nombre", nombre)
+                    put("apellido", apellido)
+                    put("email", email)
+                    put("passwordHash", HashUtil.hash(pass))
+                    put("rol", rol.name)
+                    put("telefono", "")
+                    put("activo", 1)
+                    put("fechaRegistro", System.currentTimeMillis())
+                }
+
+            fun categoria(nombre: String, descripcion: String) =
+                ContentValues().apply {
+                    put("nombre", nombre)
+                    put("descripcion", descripcion)
+                    put("imagenUrl", "")
+                }
+
+            fun producto(
+                nombre: String, descripcion: String, precio: Double, stock: Int,
+                categoriaId: Long, tecnica: String, origen: String, artesano: String
+            ) = ContentValues().apply {
+                put("nombre", nombre)
+                put("descripcion", descripcion)
+                put("precio", precio)
+                put("stock", stock)
+                put("categoriaId", categoriaId)
+                put("imagenPath", "")
+                put("tecnica", tecnica)
+                put("origen", origen)
+                put("artesano", artesano)
+                put("activo", 1)
+                put("fechaCreacion", System.currentTimeMillis())
+            }
+
+            fun insert(table: String, cv: ContentValues) =
+                db.insert(table, SQLiteDatabase.CONFLICT_ABORT, cv)
+
+            // Admin y cliente de prueba
+            insert("usuarios", usuario("Administrador", "Sistema", "admin@artesanias.mx", "Admin123", RolUsuario.ADMIN))
+            insert("usuarios", usuario("María", "González", "cliente@artesanias.mx", "Cliente123", RolUsuario.CLIENTE))
 
             // Categorías
-            val catTalavera = db.categoriaDao().insertCategoria(
-                Categoria(nombre = "Talavera", descripcion = "Cerámica tradicional de Puebla")
-            )
-            val catBarro = db.categoriaDao().insertCategoria(
-                Categoria(nombre = "Barro Negro", descripcion = "Alfarería de Oaxaca")
-            )
-            val catMayolica = db.categoriaDao().insertCategoria(
-                Categoria(nombre = "Mayólica", descripcion = "Cerámica esmaltada")
-            )
-            val catBandeja = db.categoriaDao().insertCategoria(
-                Categoria(nombre = "Utilitaria", descripcion = "Piezas de uso diario")
-            )
+            val catTalavera = insert("categorias", categoria("Talavera", "Cerámica tradicional de Puebla"))
+            val catBarro = insert("categorias", categoria("Barro Negro", "Alfarería de Oaxaca"))
+            val catMayolica = insert("categorias", categoria("Mayólica", "Cerámica esmaltada"))
+            val catBandeja = insert("categorias", categoria("Utilitaria", "Piezas de uso diario"))
 
             // Productos de ejemplo
-            val productos = listOf(
-                Producto(
-                    nombre = "Plato Talavera Grande",
-                    descripcion = "Plato decorativo tradicional de Puebla con motivos florales",
-                    precio = 350.0, stock = 12,
-                    categoriaId = catTalavera.toInt(),
-                    tecnica = "Talavera", origen = "Puebla", artesano = "Familia Uriarte"
-                ),
-                Producto(
-                    nombre = "Vasija Barro Negro",
-                    descripcion = "Pieza única de barro negro pulido de Oaxaca",
-                    precio = 480.0, stock = 4,
-                    categoriaId = catBarro.toInt(),
-                    tecnica = "Barro Negro", origen = "San Bartolo Coyotepec, Oaxaca", artesano = "Rosa Nieto"
-                ),
-                Producto(
-                    nombre = "Jarro Talavera",
-                    descripcion = "Jarro con asa, decoración azul cobalto",
-                    precio = 180.0, stock = 20,
-                    categoriaId = catTalavera.toInt(),
-                    tecnica = "Talavera", origen = "Dolores Hidalgo, Gto", artesano = "Taller del Sol"
-                ),
-                Producto(
-                    nombre = "Cazuela de Barro",
-                    descripcion = "Cazuela para cocinar, resistente al calor",
-                    precio = 220.0, stock = 8,
-                    categoriaId = catBandeja.toInt(),
-                    tecnica = "Alfarería Utilitaria", origen = "Michoacán", artesano = "Cooperativa La Barro"
-                ),
-                Producto(
-                    nombre = "Jarrón Mayólica",
-                    descripcion = "Jarrón alto con esmalte y decoración policromada",
-                    precio = 650.0, stock = 3,
-                    categoriaId = catMayolica.toInt(),
-                    tecnica = "Mayólica", origen = "Guanajuato", artesano = "Taller Gorky"
-                ),
-                Producto(
-                    nombre = "Tazón Barro Rojo",
-                    descripcion = "Tazón para sopas, barro rojo natural",
-                    precio = 95.0, stock = 2,
-                    categoriaId = catBandeja.toInt(),
-                    tecnica = "Barro Rojo", origen = "Tlaquepaque, Jalisco", artesano = "Artesanos Unidos"
-                ),
-                Producto(
-                    nombre = "Florero Talavera Mini",
-                    descripcion = "Florero pequeño para decoración, multicolor",
-                    precio = 120.0, stock = 15,
-                    categoriaId = catTalavera.toInt(),
-                    tecnica = "Talavera", origen = "Puebla", artesano = "Familia Uriarte"
-                ),
-                Producto(
-                    nombre = "Incensario Barro Negro",
-                    descripcion = "Incensario ritual de barro negro, pieza ceremonial",
-                    precio = 380.0, stock = 5,
-                    categoriaId = catBarro.toInt(),
-                    tecnica = "Barro Negro", origen = "San Marcos Tlapazola, Oaxaca", artesano = "Maestro Jiménez"
-                )
-            )
-            productos.forEach { db.productoDao().insertProducto(it) }
+            insert("productos", producto(
+                "Plato Talavera Grande", "Plato decorativo tradicional de Puebla con motivos florales",
+                350.0, 12, catTalavera, "Talavera", "Puebla", "Familia Uriarte"
+            ))
+            insert("productos", producto(
+                "Vasija Barro Negro", "Pieza única de barro negro pulido de Oaxaca",
+                480.0, 4, catBarro, "Barro Negro", "San Bartolo Coyotepec, Oaxaca", "Rosa Nieto"
+            ))
+            insert("productos", producto(
+                "Jarro Talavera", "Jarro con asa, decoración azul cobalto",
+                180.0, 20, catTalavera, "Talavera", "Dolores Hidalgo, Gto", "Taller del Sol"
+            ))
+            insert("productos", producto(
+                "Cazuela de Barro", "Cazuela para cocinar, resistente al calor",
+                220.0, 8, catBandeja, "Alfarería Utilitaria", "Michoacán", "Cooperativa La Barro"
+            ))
+            insert("productos", producto(
+                "Jarrón Mayólica", "Jarrón alto con esmalte y decoración policromada",
+                650.0, 3, catMayolica, "Mayólica", "Guanajuato", "Taller Gorky"
+            ))
+            insert("productos", producto(
+                "Tazón Barro Rojo", "Tazón para sopas, barro rojo natural",
+                95.0, 2, catBandeja, "Barro Rojo", "Tlaquepaque, Jalisco", "Artesanos Unidos"
+            ))
+            insert("productos", producto(
+                "Florero Talavera Mini", "Florero pequeño para decoración, multicolor",
+                120.0, 15, catTalavera, "Talavera", "Puebla", "Familia Uriarte"
+            ))
+            insert("productos", producto(
+                "Incensario Barro Negro", "Incensario ritual de barro negro, pieza ceremonial",
+                380.0, 5, catBarro, "Barro Negro", "San Marcos Tlapazola, Oaxaca", "Maestro Jiménez"
+            ))
         }
     }
 }

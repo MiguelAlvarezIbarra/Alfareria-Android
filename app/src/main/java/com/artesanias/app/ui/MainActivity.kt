@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private lateinit var session: SessionManager
+    private var menuRoleShown: Boolean? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +60,13 @@ class MainActivity : AppCompatActivity() {
                 else -> {
                     bottomNav.visibility = android.view.View.VISIBLE
                     supportActionBar?.show()
-                    updateMenuForRole(bottomNav)
+                    // Solo reconstruir el menú cuando cambia el rol (no en cada
+                    // navegación): limpiar/reinflar el menú aquí desincroniza el
+                    // ítem seleccionado de BottomNavigationView del NavController.
+                    if (menuRoleShown != session.isAdmin) {
+                        updateMenuForRole(bottomNav)
+                        menuRoleShown = session.isAdmin
+                    }
                 }
             }
         }
