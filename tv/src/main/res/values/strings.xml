@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Artesanías TV</string>
+    <string name="nav_productos">Catálogo</string>
+    <string name="nav_ventas">Ventas</string>
+    <string name="nav_video">Proceso</string>
+</resources>

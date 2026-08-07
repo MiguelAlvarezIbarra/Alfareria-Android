@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:background="@drawable/bg_card_focusable"
+    android:clickable="true"
+    android:focusable="true"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="110dp"
+        android:background="@drawable/bg_placeholder_producto" />
+
+    <TextView
+        android:id="@+id/txt_nombre"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:maxLines="2"
+        android:textColor="@color/colorTextPrimary"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        tools:text="Jarrón Mayólica" />
+
+    <TextView
+        android:id="@+id/txt_precio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/colorAccent"
+        android:textSize="14sp"
+        tools:text="$650.00 MXN" />
+
+    <TextView
+        android:id="@+id/txt_stock"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorTextSecondary"
+        android:textSize="13sp"
+        tools:text="Stock: 3 ⚠️" />
+
+</LinearLayout>

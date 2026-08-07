@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <!-- Riel de navegación lateral -->
+        <LinearLayout
+            android:id="@+id/nav_rail"
+            android:layout_width="220dp"
+            android:layout_height="match_parent"
+            android:background="@color/colorSurface"
+            android:orientation="vertical"
+            android:paddingTop="32dp"
+            android:paddingHorizontal="12dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:gravity="center"
+                android:text="@string/app_name"
+                android:textColor="@color/colorTextPrimary"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/nav_productos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_nav_item"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="16dp"
+                android:text="@string/nav_productos"
+                android:textColor="@color/colorTextPrimary"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/nav_ventas"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_nav_item"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="16dp"
+                android:text="@string/nav_ventas"
+                android:textColor="@color/colorTextPrimary"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/nav_video"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_nav_item"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="16dp"
+                android:text="@string/nav_video"
+                android:textColor="@color/colorTextPrimary"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+        <!-- Contenedor de pantallas -->
+        <FrameLayout
+            android:id="@+id/fragment_container"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+    </LinearLayout>
+
+    <!-- Overlay global de compra grande: visible sin importar la pantalla activa -->
+    <FrameLayout
+        android:id="@+id/overlay_compra_grande"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#B0000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="520dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_card_focusable"
+            android:orientation="vertical"
+            android:padding="32dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="💰 Compra grande"
+                android:textColor="@color/colorAccent"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txt_overlay_producto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:textColor="@color/colorTextPrimary"
+                android:textSize="20sp"
+                tools:text="Jarrón Mayólica" />
+
+            <TextView
+                android:id="@+id/txt_overlay_monto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:textColor="@color/colorTextSecondary"
+                android:textSize="18sp"
+                tools:text="$1,150.00 MXN" />
+
+        </LinearLayout>
+    </FrameLayout>
+
+</FrameLayout>
