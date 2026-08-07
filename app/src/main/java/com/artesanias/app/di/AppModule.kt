@@ -2,6 +2,7 @@ package com.artesanias.app.di
 
 import android.content.Context
 import com.artesanias.app.data.local.*
+import com.artesanias.app.data.remote.TvDataSender
 import com.artesanias.app.data.remote.WearDataSender
 import com.artesanias.app.data.repository.*
 import dagger.Module
@@ -47,8 +48,9 @@ object AppModule {
     fun provideProductoRepository(
         productoDao: ProductoDao,
         notificacionDao: NotificacionDao,
-        wearSender: WearDataSender
-    ) = ProductoRepository(productoDao, notificacionDao, wearSender)
+        wearSender: WearDataSender,
+        tvSender: TvDataSender
+    ) = ProductoRepository(productoDao, notificacionDao, wearSender, tvSender)
 
     @Provides @Singleton
     fun provideOrdenRepository(
@@ -56,8 +58,9 @@ object AppModule {
         detalleOrdenDao: DetalleOrdenDao,
         productoRepo: ProductoRepository,
         notificacionDao: NotificacionDao,
-        wearSender: WearDataSender
-    ) = OrdenRepository(ordenDao, detalleOrdenDao, productoRepo, notificacionDao, wearSender)
+        wearSender: WearDataSender,
+        tvSender: TvDataSender
+    ) = OrdenRepository(ordenDao, detalleOrdenDao, productoRepo, notificacionDao, wearSender, tvSender)
 
     @Provides @Singleton
     fun provideUsuarioRepository(usuarioDao: UsuarioDao) = UsuarioRepository(usuarioDao)

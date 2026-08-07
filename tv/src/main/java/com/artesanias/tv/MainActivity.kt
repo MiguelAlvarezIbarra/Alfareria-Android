@@ -61,5 +61,10 @@ class MainActivity : AppCompatActivity() {
         listOf(binding.navProductos, binding.navVentas, binding.navVideo).forEach {
             it.isSelected = it == itemSeleccionado
         }
+
+        // El contenido de cada pantalla (RecyclerView, VideoView...) puede
+        // robarse el foco de control remoto al aparecer; lo regresamos al
+        // riel de navegación para no perder la navegación por D-pad.
+        itemSeleccionado.post { itemSeleccionado.requestFocus() }
     }
 }

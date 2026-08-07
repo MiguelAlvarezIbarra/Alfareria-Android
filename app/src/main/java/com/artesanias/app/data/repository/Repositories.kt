@@ -2,9 +2,11 @@ package com.artesanias.app.data.repository
 
 import com.artesanias.app.data.local.*
 import com.artesanias.app.data.model.*
+import com.artesanias.app.data.remote.TvDataSender
 import com.artesanias.app.data.remote.WearDataSender
 import com.artesanias.app.util.HashUtil
 import kotlinx.coroutines.flow.Flow
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -48,7 +50,8 @@ class AuthRepository @Inject constructor(
 class ProductoRepository @Inject constructor(
     private val productoDao: ProductoDao,
     private val notificacionDao: NotificacionDao,
-    private val wearSender: WearDataSender
+    private val wearSender: WearDataSender,
+    private val tvSender: TvDataSender
 ) {
     fun getProductos(): Flow<List<Producto>> = productoDao.getAllProductos()
     fun getProductosAdmin(): Flow<List<Producto>> = productoDao.getAllProductosAdmin()
@@ -58,11 +61,12 @@ class ProductoRepository @Inject constructor(
     suspend fun getProductoById(id: Int): Producto? = productoDao.getProductoById(id)
 
     suspend fun insertarProducto(producto: Producto): Long =
-        productoDao.insertProducto(producto)
+        productoDao.insertProducto(producto).also { sincronizarCatalogoConTv() }
 
     suspend fun actualizarProducto(producto: Producto) {
         productoDao.updateProducto(producto)
         if (producto.stockBajo) notificarStockBajo(producto)
+        sincronizarCatalogoConTv()
     }
 
     suspend fun agregarStock(productoId: Int, cantidad: Int) {
@@ -71,6 +75,7 @@ class ProductoRepository @Inject constructor(
             "/stock/actualizado",
             "Producto ID $productoId: +$cantidad unidades agregadas"
         )
+        sincronizarCatalogoConTv()
     }
 
     suspend fun reducirStock(productoId: Int, cantidad: Int): Boolean {
@@ -91,6 +96,11 @@ class ProductoRepository @Inject constructor(
         }
 
         return true
+    }
+
+    // Snapshot del catálogo hacia la pantalla 1 de la TV (ver TvDataSender/TvServer)
+    suspend fun sincronizarCatalogoConTv() {
+        tvSender.enviarCatalogo(productoDao.getAllProductosSync())
     }
 
     // Integra la alerta de stock bajo con Wear OS: persiste la notificación
@@ -118,7 +128,8 @@ class OrdenRepository @Inject constructor(
     private val detalleOrdenDao: DetalleOrdenDao,
     private val productoRepository: ProductoRepository,
     private val notificacionDao: NotificacionDao,
-    private val wearSender: WearDataSender
+    private val wearSender: WearDataSender,
+    private val tvSender: TvDataSender
 ) {
     fun getOrdenes(): Flow<List<Orden>> = ordenDao.getAllOrdenes()
     fun getMisOrdenes(usuarioId: Int): Flow<List<Orden>> = ordenDao.getOrdenesByUsuario(usuarioId)
@@ -201,6 +212,16 @@ class OrdenRepository @Inject constructor(
                 }
             }
 
+            sincronizarVentasConTv()
+            if (ordenCreada.esCompraGrande) {
+                val productoLabel = if (items.size == 1) {
+                    items.first().producto.nombre
+                } else {
+                    "${items.first().producto.nombre} (+${items.size - 1} más)"
+                }
+                tvSender.enviarCompraGrande(productoLabel, total)
+            }
+
             Result.success(ordenCreada)
         } catch (e: Exception) {
             Result.failure(e)
@@ -211,6 +232,15 @@ class OrdenRepository @Inject constructor(
         ordenDao.confirmarOrden(ordenId)
         ordenDao.cambiarEstado(ordenId, EstadoOrden.CONFIRMADA)
         wearSender.enviarMensaje("/orden/confirmada", "Orden #$ordenId confirmada")
+    }
+
+    // Envía a la pantalla 2 de la TV el catálogo actualizado (cambió el stock)
+    // junto con el resumen de los últimos 7 días.
+    private suspend fun sincronizarVentasConTv() {
+        productoRepository.sincronizarCatalogoConTv()
+        val desde = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7)
+        tvSender.enviarComprasSemana(ordenDao.getComprasDesde(desde))
+        tvSender.enviarMasVendidos(ordenDao.getMasVendidosDesde(desde))
     }
 }
 

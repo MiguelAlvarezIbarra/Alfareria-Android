@@ -44,6 +44,10 @@ interface ProductoDao {
     @Query("SELECT * FROM productos ORDER BY nombre ASC")
     fun getAllProductosAdmin(): Flow<List<Producto>>
 
+    // Para enviar el snapshot del catálogo a la TV
+    @Query("SELECT * FROM productos WHERE activo = 1 ORDER BY nombre ASC")
+    suspend fun getAllProductosSync(): List<Producto>
+
     @Query("SELECT * FROM productos WHERE id = :id")
     suspend fun getProductoById(id: Int): Producto?
 
@@ -122,7 +126,32 @@ interface OrdenDao {
 
     @Query("UPDATE ordenes SET confirmada = 1 WHERE id = :id")
     suspend fun confirmarOrden(id: Int)
+
+    // Para el resumen semanal que se envía a la TV (pantalla de ventas)
+    @Query("""
+        SELECT o.fecha AS fecha, (u.nombre || ' ' || u.apellido) AS cliente, o.total AS total
+        FROM ordenes o
+        INNER JOIN usuarios u ON u.id = o.usuarioId
+        WHERE o.fecha >= :desde
+        ORDER BY o.fecha ASC
+    """)
+    suspend fun getComprasDesde(desde: Long): List<CompraResumen>
+
+    @Query("""
+        SELECT p.nombre AS nombre, SUM(d.cantidad) AS cantidad
+        FROM detalle_orden d
+        INNER JOIN ordenes o ON o.id = d.ordenId
+        INNER JOIN productos p ON p.id = d.productoId
+        WHERE o.fecha >= :desde
+        GROUP BY d.productoId
+        ORDER BY cantidad DESC
+        LIMIT 6
+    """)
+    suspend fun getMasVendidosDesde(desde: Long): List<VentaProducto>
 }
+
+data class CompraResumen(val fecha: Long, val cliente: String, val total: Double)
+data class VentaProducto(val nombre: String, val cantidad: Int)
 
 // ───────────── DETALLE ORDEN DAO ─────────────
 @Dao
