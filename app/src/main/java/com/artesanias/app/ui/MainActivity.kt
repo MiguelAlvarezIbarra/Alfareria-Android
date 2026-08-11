@@ -76,7 +76,7 @@ class MainActivity : AppCompatActivity() {
             R.id.adminUsuariosFragment, R.id.camaraFragment
         )
         val topLevelCliente = setOf(
-            R.id.tiendaFragment, R.id.carritoFragment, R.id.misOrdenesFragment
+            R.id.tiendaFragment, R.id.carritoFragment, R.id.misOrdenesFragment, R.id.talleresFragment
         )
 
         val appBarConfig = AppBarConfiguration(topLevelAdmin + topLevelCliente)

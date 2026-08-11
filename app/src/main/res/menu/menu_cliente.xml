@@ -3,4 +3,5 @@
     <item android:id="@+id/tiendaFragment" android:title="Tienda" android:icon="@android:drawable/ic_menu_gallery"/>
     <item android:id="@+id/carritoFragment" android:title="Carrito" android:icon="@android:drawable/ic_menu_add"/>
     <item android:id="@+id/misOrdenesFragment" android:title="Mis Órdenes" android:icon="@android:drawable/ic_menu_recent_history"/>
+    <item android:id="@+id/talleresFragment" android:title="Talleres" android:icon="@android:drawable/ic_menu_mapmode"/>
 </menu>

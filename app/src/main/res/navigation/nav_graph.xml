@@ -118,4 +118,10 @@
         android:name="com.artesanias.app.ui.store.MisOrdenesFragment"
         android:label="Mis órdenes" />
 
+    <fragment
+        android:id="@+id/talleresFragment"
+        android:name="com.artesanias.app.ui.store.TalleresFragment"
+        android:label="Talleres"
+        tools:layout="@layout/fragment_talleres" />
+
 </navigation>
