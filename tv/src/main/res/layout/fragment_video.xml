@@ -4,11 +4,10 @@
     android:layout_height="match_parent"
     android:background="@android:color/black">
 
-    <VideoView
-        android:id="@+id/video_view"
+    <WebView
+        android:id="@+id/web_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center" />
+        android:layout_height="match_parent" />
 
     <TextView
         android:id="@+id/txt_video_pendiente"
@@ -16,7 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center"
-        android:text="🏺 El video del proceso de alfarería se agregará aquí\n(tv/src/main/assets/video_proceso.mp4)"
+        android:text="🏺 No hay conexión a internet para cargar el video."
         android:textColor="@color/colorTextSecondary"
         android:textSize="18sp"
         android:visibility="gone" />
