@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.artesanias.tv.data.TvDataStore
 import com.artesanias.tv.databinding.ActivityMainBinding
+import com.artesanias.tv.ui.MapaFragment
 import com.artesanias.tv.ui.ProductosFragment
 import com.artesanias.tv.ui.VentasFragment
 import com.artesanias.tv.ui.VideoFragment
@@ -31,6 +32,7 @@ class MainActivity : AppCompatActivity() {
         binding.navProductos.setOnClickListener { mostrarPantalla(ProductosFragment(), binding.navProductos) }
         binding.navVentas.setOnClickListener { mostrarPantalla(VentasFragment(), binding.navVentas) }
         binding.navVideo.setOnClickListener { mostrarPantalla(VideoFragment(), binding.navVideo) }
+        binding.navMapa.setOnClickListener { mostrarPantalla(MapaFragment(), binding.navMapa) }
 
         // El overlay escucha el evento global sin importar qué Fragment esté
         // activo: por eso vive en la Activity y no en cada pantalla. Se usa
@@ -73,7 +75,7 @@ class MainActivity : AppCompatActivity() {
             .replace(binding.fragmentContainer.id, fragment)
             .commit()
 
-        listOf(binding.navProductos, binding.navVentas, binding.navVideo).forEach {
+        listOf(binding.navProductos, binding.navVentas, binding.navVideo, binding.navMapa).forEach {
             it.isSelected = it == itemSeleccionado
         }
 
