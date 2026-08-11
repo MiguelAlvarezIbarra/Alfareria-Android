@@ -10,4 +10,16 @@
         <item name="android:textSize">13sp</item>
         <item name="android:textStyle">bold</item>
     </style>
+
+    <!-- El layout de dialog_compra_grande.xml ya dibuja su propio fondo
+         oscurecido de pantalla completa, así que la ventana del Dialog debe
+         ser transparente y sin márgenes/título para que se vea como un
+         overlay centrado real, no como un diálogo del sistema. -->
+    <style name="Theme.CompraGrandeDialog" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
 </resources>

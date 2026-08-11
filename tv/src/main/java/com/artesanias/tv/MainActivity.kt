@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         dialogBinding.txtOverlayProducto.text = evento.producto
         dialogBinding.txtOverlayMonto.text = "${formatoMoneda.format(evento.monto)} MXN"
 
-        val dialog = android.app.Dialog(this, android.R.style.Theme_Translucent_NoTitleBar).apply {
+        val dialog = android.app.Dialog(this, R.style.Theme_CompraGrandeDialog).apply {
             setContentView(dialogBinding.root)
             setCancelable(true)
             setOnDismissListener { dialogoCompraGrande = null }

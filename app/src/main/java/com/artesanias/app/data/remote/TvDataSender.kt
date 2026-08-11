@@ -21,9 +21,14 @@ import javax.inject.Singleton
  * Android TV no la soporta). Ver TvServer.kt en el módulo tv para el
  * protocolo y el puerto.
  *
- * En emuladores, la IP por defecto (10.0.2.2) es el alias estándar del host
- * desde dentro del emulador del teléfono; el puerto de la TV se expone al
- * host con `adb -s <tv> forward tcp:8765 tcp:8765`.
+ * HOST_DEFAULT es la IP de la computadora que corre el emulador de TV en
+ * la red WiFi local (se ve con `ipconfig`). Solo funciona si el teléfono
+ * (físico) y la computadora están en la misma red, y si en la computadora
+ * se configuró el reenvío del puerto 8765 hacia el emulador de TV:
+ *   adb -s <tv> forward tcp:8765 tcp:8765
+ *   netsh interface portproxy add v4tov4 listenport=8765 listenaddress=0.0.0.0 connectport=8765 connectaddress=127.0.0.1
+ * Si el teléfono también fuera un emulador, usarías "10.0.2.2" en vez de
+ * la IP de la red (ese alias solo existe dentro de un emulador).
  */
 @Singleton
 class TvDataSender @Inject constructor() {
@@ -31,7 +36,7 @@ class TvDataSender @Inject constructor() {
     private val diasSemana = arrayOf("Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb")
 
     companion object {
-        const val HOST_DEFAULT = "10.0.2.2"
+        const val HOST_DEFAULT = "192.168.200.226"
         const val PUERTO = 8765
     }
 

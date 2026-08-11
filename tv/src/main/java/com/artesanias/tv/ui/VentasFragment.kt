@@ -63,6 +63,10 @@ class VentasFragment : Fragment() {
             xAxis.position = XAxis.XAxisPosition.BOTTOM
             xAxis.granularity = 1f
             xAxis.setDrawGridLines(false)
+            xAxis.textSize = 10f
+            xAxis.labelRotationAngle = -35f
+            xAxis.setAvoidFirstLastClipping(true)
+            extraBottomOffset = 24f
             setFitBars(true)
         }
     }
