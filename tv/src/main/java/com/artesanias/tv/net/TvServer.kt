@@ -27,7 +27,7 @@ import java.net.Socket
  *   compra_grande   -> {"tipo":"compra_grande","producto":"...","monto":123.45}
  */
 object TvServer {
-    const val PUERTO = 8765
+    const val PUERTO = 8766
     private const val TAG = "TvServer"
 
     private var iniciado = false
