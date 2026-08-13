@@ -5,6 +5,7 @@ import com.artesanias.app.data.local.CompraResumen
 import com.artesanias.app.data.local.VentaProducto
 import com.artesanias.app.data.model.Producto
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
@@ -16,19 +17,23 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Envía datos a la app de Android TV por un socket TCP en la red local
- * (la Wearable Data Layer que usa WearDataSender es exclusiva de Wear OS,
- * Android TV no la soporta). Ver TvServer.kt en el módulo tv para el
- * protocolo y el puerto.
+ * Envía datos a la app de Android TV por un socket TCP (la Wearable Data
+ * Layer que usa WearDataSender es exclusiva de Wear OS, Android TV no la
+ * soporta). Ver TvServer.kt en el módulo tv para el protocolo y el puerto.
  *
- * HOST_DEFAULT es la IP de la computadora que corre el emulador de TV en
- * la red WiFi local (se ve con `ipconfig`). Solo funciona si el teléfono
- * (físico) y la computadora están en la misma red, y si en la computadora
- * se configuró el reenvío del puerto 8765 hacia el emulador de TV:
+ * HOST_DEFAULT es "127.0.0.1" a propósito: se probó primero con la IP WiFi
+ * de la PC en la red local, pero el router bloquea la conexión iniciada
+ * desde el celular hacia la PC (aislamiento de clientes WiFi) aunque el
+ * sentido contrario sí funciona — no hay forma de arreglar eso desde la
+ * app o desde el firewall de Windows, así que en vez de WiFi se usa el
+ * cable USB con `adb reverse`, que crea un túnel 127.0.0.1:8765 (celular)
+ * -> 127.0.0.1:8765 (PC) sin pasar por el router:
+ *   adb -s <celular> reverse tcp:8765 tcp:8765
  *   adb -s <tv> forward tcp:8765 tcp:8765
  *   netsh interface portproxy add v4tov4 listenport=8765 listenaddress=0.0.0.0 connectport=8765 connectaddress=127.0.0.1
- * Si el teléfono también fuera un emulador, usarías "10.0.2.2" en vez de
- * la IP de la red (ese alias solo existe dentro de un emulador).
+ * (el portproxy ya no es necesario para este flujo por USB, pero se deja
+ * documentado por si se vuelve a usar WiFi en una red sin aislamiento).
+ * El celular debe permanecer conectado por USB para que esto funcione.
  */
 @Singleton
 class TvDataSender @Inject constructor() {
@@ -36,20 +41,27 @@ class TvDataSender @Inject constructor() {
     private val diasSemana = arrayOf("Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb")
 
     companion object {
-        const val HOST_DEFAULT = "192.168.200.226"
-        const val PUERTO = 8765
+        const val HOST_DEFAULT = "127.0.0.1"
+        const val PUERTO = 8766
     }
 
     private suspend fun enviar(json: JSONObject) = withContext(Dispatchers.IO) {
+        Log.d(TAG, "Intentando enviar a $HOST_DEFAULT:$PUERTO -> ${json.optString("tipo")}")
         try {
             Socket().use { socket ->
                 socket.connect(InetSocketAddress(HOST_DEFAULT, PUERTO), 1500)
                 socket.getOutputStream().write((json.toString() + "\n").toByteArray(Charsets.UTF_8))
                 socket.getOutputStream().flush()
+                // Al ir por USB (adb reverse -> adb forward, dos saltos
+                // encadenados) hay más latencia que en loopback puro; sin
+                // esta espera el socket se cierra antes de que el dato
+                // alcance a cruzar el segundo salto hacia el emulador de TV.
+                delay(300)
             }
+            Log.d(TAG, "Enviado a la TV correctamente: ${json.optString("tipo")}")
         } catch (e: Exception) {
             // La TV es opcional: si no está conectada, no debe afectar el flujo normal de la app.
-            Log.w(TAG, "No se pudo enviar a la TV: ${e.message}")
+            Log.w(TAG, "No se pudo enviar a la TV: ${e.javaClass.simpleName}: ${e.message}")
         }
     }
 
