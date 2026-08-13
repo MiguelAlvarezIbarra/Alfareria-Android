@@ -10,7 +10,6 @@ import com.artesanias.tv.databinding.ActivityMainBinding
 import com.artesanias.tv.ui.MapaFragment
 import com.artesanias.tv.ui.ProductosFragment
 import com.artesanias.tv.ui.VentasFragment
-import com.artesanias.tv.ui.VideoFragment
 import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
@@ -31,7 +30,6 @@ class MainActivity : AppCompatActivity() {
 
         binding.navProductos.setOnClickListener { mostrarPantalla(ProductosFragment(), binding.navProductos) }
         binding.navVentas.setOnClickListener { mostrarPantalla(VentasFragment(), binding.navVentas) }
-        binding.navVideo.setOnClickListener { mostrarPantalla(VideoFragment(), binding.navVideo) }
         binding.navMapa.setOnClickListener { mostrarPantalla(MapaFragment(), binding.navMapa) }
 
         // El overlay escucha el evento global sin importar qué Fragment esté
@@ -75,7 +73,7 @@ class MainActivity : AppCompatActivity() {
             .replace(binding.fragmentContainer.id, fragment)
             .commit()
 
-        listOf(binding.navProductos, binding.navVentas, binding.navVideo, binding.navMapa).forEach {
+        listOf(binding.navProductos, binding.navVentas, binding.navMapa).forEach {
             it.isSelected = it == itemSeleccionado
         }
 
