@@ -1,5 +1,6 @@
 package com.artesanias.app.data.repository
 
+import android.util.Log
 import com.artesanias.app.data.local.*
 import com.artesanias.app.data.model.*
 import com.artesanias.app.data.remote.TvDataSender
@@ -225,14 +226,22 @@ class OrdenRepository @Inject constructor(
                 }
             }
 
-            sincronizarVentasConTv()
-            if (ordenCreada.esCompraGrande) {
-                val productoLabel = if (items.size == 1) {
-                    items.first().producto.nombre
-                } else {
-                    "${items.first().producto.nombre} (+${items.size - 1} más)"
+            // La sincronización con la TV es "best effort": si falla (p.ej. TV
+            // apagada o sin red) no debe hacer fallar la compra, que ya quedó
+            // guardada en la base de datos. Se aísla en su propio try/catch
+            // con logging explícito para poder diagnosticar fallas de red.
+            try {
+                sincronizarVentasConTv()
+                if (ordenCreada.esCompraGrande) {
+                    val productoLabel = if (items.size == 1) {
+                        items.first().producto.nombre
+                    } else {
+                        "${items.first().producto.nombre} (+${items.size - 1} más)"
+                    }
+                    tvSender.enviarCompraGrande(productoLabel, total)
                 }
-                tvSender.enviarCompraGrande(productoLabel, total)
+            } catch (e: Exception) {
+                Log.e("OrdenRepository", "Fallo al sincronizar con la TV (orden #$ordenId ya se creó bien)", e)
             }
 
             Result.success(ordenCreada)
