@@ -143,6 +143,19 @@ class OrdenRepository @Inject constructor(
         items: List<ItemCarrito>
     ): Result<Orden> {
         return try {
+            // Validar stock ANTES de crear la orden: reducirStock() ya protege
+            // la base de datos (no deja bajar de 0), pero antes su resultado
+            // se ignoraba, así que la compra se cobraba igual aunque no
+            // hubiera stock suficiente para descontarlo.
+            for (item in items) {
+                val productoActual = productoRepository.getProductoById(item.producto.id)
+                if (productoActual == null || productoActual.stock < item.cantidad) {
+                    return Result.failure(
+                        Exception("Sin stock suficiente de ${item.producto.nombre} (disponible: ${productoActual?.stock ?: 0})")
+                    )
+                }
+            }
+
             val total = items.sumOf { it.subtotal }
             val orden = Orden(usuarioId = usuarioId, total = total)
             val ordenId = ordenDao.insertOrden(orden).toInt()
