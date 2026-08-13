@@ -64,9 +64,9 @@ class VentasFragment : Fragment() {
             xAxis.granularity = 1f
             xAxis.setDrawGridLines(false)
             xAxis.textSize = 10f
-            xAxis.labelRotationAngle = -35f
+            xAxis.labelRotationAngle = 0f
             xAxis.setAvoidFirstLastClipping(true)
-            extraBottomOffset = 24f
+            extraBottomOffset = 12f
             setFitBars(true)
         }
     }
@@ -80,8 +80,13 @@ class VentasFragment : Fragment() {
         }
         binding.chartMasVendidos.data = BarData(dataSet)
         binding.chartMasVendidos.xAxis.valueFormatter =
-            IndexAxisValueFormatter(items.map { it.nombre })
+            IndexAxisValueFormatter(items.map { acortar(it.nombre) })
         binding.chartMasVendidos.invalidate()
+    }
+
+    private fun acortar(nombre: String): String {
+        val primeraPalabra = nombre.substringBefore(' ')
+        return if (primeraPalabra.length > 9) primeraPalabra.take(8) + "…" else primeraPalabra
     }
 
     override fun onDestroyView() {
