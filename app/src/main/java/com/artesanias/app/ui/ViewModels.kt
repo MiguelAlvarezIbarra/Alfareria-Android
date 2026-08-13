@@ -265,8 +265,14 @@ class TiendaViewModel @Inject constructor(
     val misOrdenes: LiveData<List<Orden>> =
         ordenRepository.getMisOrdenes(session.userId).asLiveData()
 
-    private val _ordenResult = MutableLiveData<Result<Orden>>()
-    val ordenResult: LiveData<Result<Orden>> = _ordenResult
+    // Nullable a propósito: LiveData reemite el último valor a cualquier
+    // observador nuevo (p.ej. al volver a entrar al Carrito), así que sin
+    // "consumirOrdenResult" el diálogo de compra exitosa y la navegación a
+    // Mis Órdenes se repetían solas cada vez que se reabría la pantalla.
+    private val _ordenResult = MutableLiveData<Result<Orden>?>(null)
+    val ordenResult: LiveData<Result<Orden>?> = _ordenResult
+
+    fun consumirOrdenResult() { _ordenResult.value = null }
 
     private val _loading = MutableLiveData(false)
     val loading: LiveData<Boolean> = _loading

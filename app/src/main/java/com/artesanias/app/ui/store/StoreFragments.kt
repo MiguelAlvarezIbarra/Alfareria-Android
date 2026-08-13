@@ -7,6 +7,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.artesanias.app.R
@@ -70,7 +71,11 @@ class TiendaFragment : Fragment() {
 
         binding.btnCerrarSesion.setOnClickListener {
             authViewModel.cerrarSesion()
-            findNavController().navigate(R.id.loginFragment)
+            // popUpTo el grafo completo: al cerrar sesión no debe quedar nada
+            // de la sesión anterior en la pila de retroceso.
+            findNavController().navigate(R.id.loginFragment, null, navOptions {
+                popUpTo(findNavController().graph.id) { inclusive = true }
+            })
         }
 
         // Swipe refresh
@@ -151,6 +156,7 @@ class CarritoFragment : Fragment() {
         }
 
         viewModel.ordenResult.observe(viewLifecycleOwner) { result ->
+            if (result == null) return@observe
             result.onSuccess { orden ->
                 val mensaje = when {
                     orden.requiereConfirmacion ->
@@ -164,12 +170,20 @@ class CarritoFragment : Fragment() {
                     .setTitle("Compra exitosa")
                     .setMessage(mensaje)
                     .setPositiveButton("OK") { _, _ ->
-                        findNavController().navigate(R.id.misOrdenesFragment)
+                        // popUpTo el carrito: cada compra no debe apilar una
+                        // pantalla nueva sobre la anterior, o la pila de
+                        // navegación crece sin límite con cada compra hecha
+                        // y el bottom nav termina sin responder.
+                        findNavController().navigate(R.id.misOrdenesFragment, null, navOptions {
+                            popUpTo(R.id.carritoFragment) { inclusive = true }
+                            launchSingleTop = true
+                        })
                     }
                     .show()
             }.onFailure { e ->
                 Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_LONG).show()
             }
+            viewModel.consumirOrdenResult()
         }
 
         binding.btnComprar.setOnClickListener {
