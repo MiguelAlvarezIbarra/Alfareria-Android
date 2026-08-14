@@ -292,43 +292,43 @@ No hace falta ningún túnel: ambos emuladores comparten la misma máquina host,
 
 | Login | Registro | Panel de Admin |
 |---|---|---|
-| ![Login](evidencias/phone/phone_01_login.png) | ![Registro](evidencias/phone/phone_04_registro.png) | ![Panel Admin](evidencias/phone/phone_02_admin_dashboard.png) |
+| <img src="evidencias/phone/phone_01_login.png" width="220"/> | <img src="evidencias/phone/phone_04_registro.png" width="220"/> | <img src="evidencias/phone/phone_02_admin_dashboard.png" width="220"/> |
 
 | Tienda (Cliente) | Carrito | Mis Órdenes |
 |---|---|---|
-| ![Tienda](evidencias/phone/phone_03_tienda.png) | ![Carrito](evidencias/phone/phone_05_carrito.png) | ![Mis Órdenes](evidencias/phone/phone_06_mis_ordenes.png) |
+| <img src="evidencias/phone/phone_03_tienda.png" width="220"/> | <img src="evidencias/phone/phone_05_carrito.png" width="220"/> | <img src="evidencias/phone/phone_06_mis_ordenes.png" width="220"/> |
 
 | Talleres (mapa) | Inventario (Admin) | Editar producto |
 |---|---|---|
-| ![Talleres](evidencias/phone/phone_07_talleres.png) | ![Inventario](evidencias/phone/phone_08_inventario.png) | ![Editar producto](evidencias/phone/phone_09_editar_producto.png) |
+| <img src="evidencias/phone/phone_07_talleres.png" width="220"/> | <img src="evidencias/phone/phone_08_inventario.png" width="220"/> | <img src="evidencias/phone/phone_09_editar_producto.png" width="220"/> |
 
 | Usuarios (Admin) | Cámara — Fotografiar producto | Nuevo producto (con foto) |
 |---|---|---|
-| ![Usuarios](evidencias/phone/phone_10_usuarios.png) | ![Cámara](evidencias/phone/phone_11_camara_foto.png) | ![Nuevo producto](evidencias/phone/phone_12_nuevo_producto.png) |
+| <img src="evidencias/phone/phone_10_usuarios.png" width="220"/> | <img src="evidencias/phone/phone_11_camara_foto.png" width="220"/> | <img src="evidencias/phone/phone_12_nuevo_producto.png" width="220"/> |
 
 ### 📺 Módulo Android TV
 
-| Catálogo | Ventas | Talleres (mapa) |
-|---|---|---|
-| ![Catálogo](evidencias/tv/tv_01_productos.png) | ![Ventas](evidencias/tv/tv_02_ventas.png) | ![Mapa de talleres](evidencias/tv/tv_03_mapa.png) |
+| Catálogo | Ventas |
+|---|---|
+| <img src="evidencias/tv/tv_01_productos.png" width="420"/> | <img src="evidencias/tv/tv_02_ventas.png" width="420"/> |
 
-| Alerta de compra grande (overlay) |
-|---|
-| ![Alerta de compra grande](evidencias/tv/tv_04_alerta_compra_grande.png) |
+| Talleres (mapa) | Alerta de compra grande (overlay) |
+|---|---|
+| <img src="evidencias/tv/tv_03_mapa.png" width="420"/> | <img src="evidencias/tv/tv_04_alerta_compra_grande.png" width="420"/> |
 
 ### ⌚ Módulo Wear OS
 
 | Pantalla principal | Lista de stock bajo | Alerta de stock bajo |
 |---|---|---|
-| ![Pantalla principal](evidencias/wear_01_pantalla_principal.png) | ![Lista stock bajo](evidencias/wear_02_lista_stock_bajo.png) | ![Alerta stock bajo](evidencias/wear_03_alerta_stock_bajo.png) |
+| <img src="evidencias/wear_01_pantalla_principal.png" width="220"/> | <img src="evidencias/wear_02_lista_stock_bajo.png" width="220"/> | <img src="evidencias/wear_03_alerta_stock_bajo.png" width="220"/> |
 
 | Agregar stock | Alerta de compra grande | Confirmar compra |
 |---|---|---|
-| ![Agregar stock](evidencias/wear_04_agregar_stock.png) | ![Compra grande](evidencias/wear_05_alerta_compra_grande.png) | ![Confirmar compra](evidencias/wear_06_confirmar_compra.png) |
+| <img src="evidencias/wear_04_agregar_stock.png" width="220"/> | <img src="evidencias/wear_05_alerta_compra_grande.png" width="220"/> | <img src="evidencias/wear_06_confirmar_compra.png" width="220"/> |
 
 | Confirmar / Desestimar | Orden confirmada | Stock suficiente |
 |---|---|---|
-| ![Botones confirmar](evidencias/wear_07_confirmar_compra_botones.png) | ![Orden confirmada](evidencias/wear_08_orden_confirmada.png) | ![Stock suficiente](evidencias/wear_09_stock_suficiente.png) |
+| <img src="evidencias/wear_07_confirmar_compra_botones.png" width="220"/> | <img src="evidencias/wear_08_orden_confirmada.png" width="220"/> | <img src="evidencias/wear_09_stock_suficiente.png" width="220"/> |
 
 > Más capturas disponibles en la carpeta [`evidencias/`](evidencias/).
 
