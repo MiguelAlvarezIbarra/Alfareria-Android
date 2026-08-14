@@ -25,6 +25,11 @@ import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
 
+/**
+ * Pantalla 2: gráfica de barras de los productos más vendidos (usando la
+ * librería MPAndroidChart) más la tabla de compras de la semana, ambas
+ * actualizadas en vivo desde TvDataStore.
+ */
 class VentasFragment : Fragment() {
 
     private var _binding: FragmentVentasBinding? = null
@@ -51,6 +56,7 @@ class VentasFragment : Fragment() {
         }
     }
 
+    /** Ajustes de apariencia de la gráfica (una sola vez, no cambian entre actualizaciones de datos). */
     private fun configurarChart() {
         val textoClaro = ContextCompat.getColor(requireContext(), R.color.colorTextPrimary)
         binding.chartMasVendidos.apply {
@@ -71,6 +77,7 @@ class VentasFragment : Fragment() {
         }
     }
 
+    /** Reconstruye las barras de la gráfica cada vez que llega un ranking nuevo del teléfono. */
     private fun dibujarChart(items: List<TvMasVendido>) {
         val entries = items.mapIndexed { i, m -> BarEntry(i.toFloat(), m.cantidad.toFloat()) }
         val dataSet = BarDataSet(entries, "Unidades vendidas").apply {
@@ -84,6 +91,7 @@ class VentasFragment : Fragment() {
         binding.chartMasVendidos.invalidate()
     }
 
+    /** Reduce el nombre del producto a su primera palabra para que las etiquetas no se encimen entre barras. */
     private fun acortar(nombre: String): String {
         val primeraPalabra = nombre.substringBefore(' ')
         return if (primeraPalabra.length > 9) primeraPalabra.take(8) + "…" else primeraPalabra

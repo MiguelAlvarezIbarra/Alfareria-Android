@@ -18,6 +18,25 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
+// ─────────────────────────────────────────────────────────────────────────
+// ViewModels: son el puente entre los repositorios (datos) y los
+// Fragments (UI). Sobreviven a los cambios de configuración (rotar la
+// pantalla) y, cuando se piden con `by activityViewModels()` en vez de
+// `by viewModels()`, se comparten entre todos los Fragments de la misma
+// Activity (útil para el carrito o la sesión, que deben verse igual sin
+// importar en qué pantalla esté el usuario).
+//
+// `@HiltViewModel` + `@Inject constructor(...)`: Hilt construye el
+// ViewModel resolviendo sus dependencias (repositorios) automáticamente,
+// de la misma forma que con los repositorios en AppModule.kt.
+//
+// `ViewModel` vs `AndroidViewModel`: `AndroidViewModel` es igual pero
+// además recibe el `Application` como Context seguro de usar (no se fuga
+// memoria porque el Application vive tanto como el ViewModel), necesario
+// aquí donde se arma un `SessionManager` o se registra un
+// `BroadcastReceiver` directamente en el ViewModel.
+// ─────────────────────────────────────────────────────────────────────────
+
 // ─────────────────────────────────────────────
 // AUTH VIEW MODEL
 // ─────────────────────────────────────────────
@@ -29,11 +48,18 @@ class AuthViewModel @Inject constructor(
 
     private val sessionManager = SessionManager(application)
 
-    private val _loginResult = MutableLiveData<Result<Usuario>>()
-    val loginResult: LiveData<Result<Usuario>> = _loginResult
+    // Nullable a propósito: un LiveData normal reemite su último valor a
+    // cualquier observador nuevo. Sin consumirResult, al volver a la
+    // pantalla de login (p.ej. después de cerrar sesión) se disparaba otra
+    // vez la navegación del inicio de sesión anterior, chocando con la
+    // navegación del logout y tumbando la app.
+    private val _loginResult = MutableLiveData<Result<Usuario>?>(null)
+    val loginResult: LiveData<Result<Usuario>?> = _loginResult
+    fun consumirLoginResult() { _loginResult.value = null }
 
-    private val _registerResult = MutableLiveData<Result<Long>>()
-    val registerResult: LiveData<Result<Long>> = _registerResult
+    private val _registerResult = MutableLiveData<Result<Long>?>(null)
+    val registerResult: LiveData<Result<Long>?> = _registerResult
+    fun consumirRegisterResult() { _registerResult.value = null }
 
     private val _loading = MutableLiveData(false)
     val loading: LiveData<Boolean> = _loading
@@ -41,7 +67,12 @@ class AuthViewModel @Inject constructor(
     val isLoggedIn: Boolean get() = sessionManager.isLoggedIn
     val currentUser get() = sessionManager
 
+    /** Intenta iniciar sesión; el resultado (éxito o error) llega por `loginResult`. */
     fun login(email: String, password: String) {
+        // viewModelScope: alcance de corrutinas atado al ciclo de vida del
+        // ViewModel — se cancela solo cuando el ViewModel se destruye, así
+        // que la corrutina puede seguir corriendo aunque el Fragment que la
+        // disparó ya no esté en pantalla (p.ej. tras rotar la pantalla).
         viewModelScope.launch {
             _loading.value = true
             try {
@@ -68,7 +99,10 @@ class AuthViewModel @Inject constructor(
         }
     }
 
-    fun cerrarSesion() = sessionManager.cerrarSesion()
+    fun cerrarSesion() {
+        sessionManager.cerrarSesion()
+        _loginResult.value = null
+    }
 }
 
 // ─────────────────────────────────────────────
@@ -84,6 +118,9 @@ class AdminProductosViewModel @Inject constructor(
     private val TAG = "AdminProductosVM"
     private val context = application.applicationContext
 
+    // .asLiveData(): convierte el Flow reactivo del repositorio (que viene
+    // de Room) en LiveData, el tipo que observan los Fragments con
+    // `.observe(viewLifecycleOwner) { ... }`.
     val productos: LiveData<List<Producto>> =
         productoRepository.getProductosAdmin().asLiveData()
 
@@ -97,6 +134,10 @@ class AdminProductosViewModel @Inject constructor(
     val loading: LiveData<Boolean> = _loading
 
     // ── Receiver para comandos del Wear OS ──
+    // Escucha los broadcasts locales que WearableDataListenerService
+    // dispara cuando llega un mensaje del reloj, para reaccionar aunque el
+    // panel de admin esté abierto en ese momento (agregar stock al vuelo,
+    // responder la solicitud de inventario).
     private val wearReceiver = object : BroadcastReceiver() {
         override fun onReceive(ctx: Context?, intent: Intent?) {
             when (intent?.action) {
@@ -120,7 +161,10 @@ class AdminProductosViewModel @Inject constructor(
     }
 
     init {
-        // Registrar receiver para escuchar comandos del Wear
+        // Registrar receiver para escuchar comandos del Wear.
+        // RECEIVER_NOT_EXPORTED: el broadcast es interno de esta app (lo
+        // dispara otro componente del mismo paquete), así que no hace
+        // falta ni es seguro exponerlo a otras apps del dispositivo.
         val filter = IntentFilter().apply {
             addAction("com.artesanias.app.AGREGAR_STOCK")
             addAction("com.artesanias.app.SOLICITAR_STOCK_LISTA")
@@ -128,6 +172,9 @@ class AdminProductosViewModel @Inject constructor(
         context.registerReceiver(wearReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
     }
 
+    // Se llama cuando el ViewModel se destruye de verdad (no en cada
+    // recreación de pantalla): hay que des-registrar el receiver aquí para
+    // no dejarlo "colgado" escuchando broadcasts para siempre.
     override fun onCleared() {
         super.onCleared()
         try {
@@ -137,6 +184,7 @@ class AdminProductosViewModel @Inject constructor(
         }
     }
 
+    /** Inserta un producto nuevo (id == 0) o actualiza uno existente, según corresponda. */
     fun guardarProducto(producto: Producto) {
         viewModelScope.launch {
             _loading.value = true
@@ -170,6 +218,9 @@ class AdminProductosViewModel @Inject constructor(
     private fun enviarListaStockAlReloj(nodeId: String) {
         viewModelScope.launch {
             try {
+                // .first(): toma solo la emisión más reciente del Flow y
+                // sigue, sin quedarse suscrito (aquí no se necesita seguir
+                // escuchando cambios, solo responder una vez a la solicitud).
                 val productosConStockBajo = productoRepository
                     .getProductosStockBajo()
                     .first()
@@ -220,10 +271,15 @@ class AdminUsuariosViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             val result = usuarioRepository.insertar(nombre, apellido, email, password, rol)
+            // .map { }: convierte un Result<Long> (el id generado, que no
+            // interesa aquí) en un Result<Unit>, conservando si fue éxito o
+            // error, para que operacionResult tenga un solo tipo genérico
+            // sin importar qué operación de administración lo haya producido.
             _operacionResult.value = result.map { }
         }
     }
 
+    /** Invierte el estado activo/inactivo de una cuenta (bloquear o desbloquear el acceso). */
     fun toggleActivo(usuario: Usuario) {
         viewModelScope.launch {
             usuarioRepository.setActivo(usuario.id, !usuario.activo)
@@ -234,6 +290,9 @@ class AdminUsuariosViewModel @Inject constructor(
 // ─────────────────────────────────────────────
 // TIENDA VIEW MODEL (cliente)
 // ─────────────────────────────────────────────
+// Compartido por todos los Fragments del cliente (Tienda, Carrito, Mis
+// Órdenes) vía `by activityViewModels()`, para que el carrito armado en
+// la pantalla de Tienda siga existiendo al entrar a Carrito.
 @HiltViewModel
 class TiendaViewModel @Inject constructor(
     application: Application,
@@ -243,6 +302,11 @@ class TiendaViewModel @Inject constructor(
 
     private val session = SessionManager(application)
 
+    // StateFlow para el texto de búsqueda: siempre tiene un valor actual
+    // (empieza en ""), a diferencia de un Flow normal que solo emite hacia
+    // adelante. flatMapLatest lo usa para cambiar de query de búsqueda
+    // sobre la marcha, cancelando automáticamente la búsqueda anterior si
+    // el usuario sigue escribiendo antes de que termine.
     private val _query = MutableStateFlow("")
     val query = _query.asStateFlow()
 
@@ -251,6 +315,8 @@ class TiendaViewModel @Inject constructor(
         else productoRepository.buscar(q)
     }.asLiveData()
 
+    // El carrito vive solo en memoria (no en Room) mientras se arma el
+    // pedido; ver ItemCarrito en Models.kt.
     private val _carrito = MutableLiveData<MutableList<ItemCarrito>>(mutableListOf())
     val carrito: LiveData<MutableList<ItemCarrito>> = _carrito
 
@@ -279,6 +345,7 @@ class TiendaViewModel @Inject constructor(
 
     fun buscar(q: String) { _query.value = q }
 
+    /** Agrega un producto al carrito, sumando la cantidad si ya estaba (no duplica la línea). */
     fun agregarAlCarrito(producto: Producto, cantidad: Int = 1) {
         val lista = _carrito.value ?: mutableListOf()
         val existing = lista.find { it.producto.id == producto.id }
@@ -287,6 +354,9 @@ class TiendaViewModel @Inject constructor(
         } else {
             lista.add(ItemCarrito(producto, cantidad))
         }
+        // Reasignar `_carrito.value` (aunque sea la misma lista mutada) es
+        // necesario para que LiveData notifique a los observadores: solo
+        // muta el contenido de la lista no dispara la notificación por sí solo.
         _carrito.value = lista
     }
 
@@ -305,6 +375,7 @@ class TiendaViewModel @Inject constructor(
 
     fun limpiarCarrito() { _carrito.value = mutableListOf() }
 
+    /** Confirma la compra del carrito actual; el resultado llega por `ordenResult`. */
     fun realizarCompra() {
         val items = _carrito.value?.toList() ?: return
         if (items.isEmpty()) return

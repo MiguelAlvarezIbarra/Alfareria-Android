@@ -11,16 +11,31 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// ─────────────────────────────────────────────────────────────────────────
+// Capa de repositorios: es la única capa que los ViewModels deberían tocar
+// para leer o escribir datos. Cada repositorio junta un DAO de Room (la
+// fuente de datos local) con los "senders" del reloj y la TV, para que la
+// lógica de negocio (cuándo notificar, cuándo sincronizar) viva en un solo
+// lugar y no se repita en cada pantalla.
+//
+// `@Singleton` + `@Inject constructor(...)`: Hilt crea una sola instancia
+// de cada repositorio para toda la app y la entrega automáticamente a
+// quien la pida en su constructor (ViewModels, Services, etc.), resolviendo
+// también las dependencias del propio repositorio (los DAOs, los senders).
+// ─────────────────────────────────────────────────────────────────────────
+
 // ───────────── AUTH REPOSITORY ─────────────
 @Singleton
 class AuthRepository @Inject constructor(
     private val usuarioDao: UsuarioDao
 ) {
+    /** Verifica credenciales contra el hash guardado; null si no coinciden o el usuario está inactivo. */
     suspend fun login(email: String, password: String): Usuario? {
         val hash = HashUtil.hash(password)
         return usuarioDao.login(email.trim().lowercase(), hash)
     }
 
+    /** Crea una cuenta nueva (cliente por defecto), rechazando correos ya registrados. */
     suspend fun registrar(
         nombre: String, apellido: String,
         email: String, password: String,
@@ -64,12 +79,14 @@ class ProductoRepository @Inject constructor(
     suspend fun insertarProducto(producto: Producto): Long =
         productoDao.insertProducto(producto).also { sincronizarCatalogoConTv() }
 
+    /** Actualiza un producto y, si quedó con poco stock, dispara la alerta correspondiente al reloj. */
     suspend fun actualizarProducto(producto: Producto) {
         productoDao.updateProducto(producto)
         if (producto.stockBajo) notificarStockBajo(producto)
         sincronizarCatalogoConTv()
     }
 
+    /** Suma unidades al inventario (reabastecimiento) y avisa al reloj y a la TV. */
     suspend fun agregarStock(productoId: Int, cantidad: Int) {
         productoDao.agregarStock(productoId, cantidad)
         wearSender.enviarMensaje(
@@ -79,6 +96,14 @@ class ProductoRepository @Inject constructor(
         sincronizarCatalogoConTv()
     }
 
+    /**
+     * Descuenta stock de un producto de forma segura, y notifica al reloj
+     * si el producto quedó con 5 unidades o menos.
+     *
+     * @return `true` si se pudo descontar (había stock suficiente),
+     *   `false` si no (ver ProductoDao.reducirStock: el UPDATE con
+     *   `WHERE stock >= :cantidad` no afecta ninguna fila en ese caso).
+     */
     suspend fun reducirStock(productoId: Int, cantidad: Int): Boolean {
         // 1. Leer el producto ANTES de reducir para tener el stock actual
         val productoActual = productoDao.getProductoById(productoId) ?: return false
@@ -137,8 +162,15 @@ class OrdenRepository @Inject constructor(
     fun getDetalles(ordenId: Int): Flow<List<DetalleOrden>> =
         detalleOrdenDao.getDetallesByOrden(ordenId)
 
-    // ───────────── ORDEN REPOSITORY ─────────────
-
+    /**
+     * Confirma la compra de un carrito: valida stock, crea la orden y su
+     * detalle, descuenta inventario, y dispara las notificaciones al
+     * reloj (siempre) y a la TV (si la conexión está disponible). Es el
+     * flujo central de negocio de toda la app.
+     *
+     * @return `Result.success` con la orden ya creada, o `Result.failure`
+     *   si no había stock suficiente o algo más falló al guardarla.
+     */
     suspend fun crearOrden(
         usuarioId: Int,
         items: List<ItemCarrito>
@@ -194,7 +226,8 @@ class OrdenRepository @Inject constructor(
                 "${p.id}:${p.nombre}:${p.stock}"
             }
 
-            // Notificaciones según monto
+            // Notificaciones según monto (ver Orden.esCompraGrande /
+            // requiereConfirmacion en Models.kt para los umbrales).
             when {
                 ordenCreada.requiereConfirmacion -> {
                     val msg = "Compra de \$${String.format("%.2f", total)} requiere confirmación #$ordenId"
@@ -250,6 +283,7 @@ class OrdenRepository @Inject constructor(
         }
     }
 
+    /** Marca una orden > $1000 como aprobada tras la confirmación del reloj. */
     suspend fun confirmarOrden(ordenId: Int) {
         ordenDao.confirmarOrden(ordenId)
         ordenDao.cambiarEstado(ordenId, EstadoOrden.CONFIRMADA)
@@ -267,6 +301,9 @@ class OrdenRepository @Inject constructor(
 }
 
 // ───────────── USUARIO REPOSITORY ─────────────
+// Operaciones de administración de cuentas (panel de admin): listar,
+// activar/desactivar y dar de alta usuarios sin pasar por el flujo de
+// autologin de AuthRepository.
 @Singleton
 class UsuarioRepository @Inject constructor(
     private val usuarioDao: UsuarioDao
@@ -277,6 +314,7 @@ class UsuarioRepository @Inject constructor(
 
     suspend fun actualizar(usuario: Usuario) = usuarioDao.updateUsuario(usuario)
 
+    /** Activa o desactiva una cuenta (borrado lógico: un usuario inactivo no puede iniciar sesión). */
     suspend fun setActivo(id: Int, activo: Boolean) = usuarioDao.setActivo(id, activo)
 
     suspend fun insertar(

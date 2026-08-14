@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
 
+/** Pantalla 1: catálogo de productos en cuadrícula, en vivo desde TvDataStore. */
 class ProductosFragment : Fragment() {
 
     private var _binding: FragmentProductosBinding? = null
@@ -33,6 +34,11 @@ class ProductosFragment : Fragment() {
         binding.recyclerProductos.layoutManager = GridLayoutManager(requireContext(), 4)
         binding.recyclerProductos.adapter = adapter
 
+        // viewLifecycleOwner.lifecycleScope: la corrutina se cancela sola
+        // cuando se destruye la VISTA del Fragment (no el Fragment en sí),
+        // que es lo correcto para un `collect` que actualiza vistas —
+        // sigue escuchando el catálogo en tiempo real mientras esta
+        // pantalla esté visible, y se detiene al salir de ella.
         viewLifecycleOwner.lifecycleScope.launch {
             TvDataStore.productos.collect { adapter.actualizar(it) }
         }

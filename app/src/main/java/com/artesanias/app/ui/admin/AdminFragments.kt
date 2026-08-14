@@ -5,8 +5,10 @@ import android.view.*
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.artesanias.app.R
 import com.artesanias.app.data.model.*
@@ -21,6 +23,26 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import dagger.hilt.android.AndroidEntryPoint
 
+// ─────────────────────────────────────────────────────────────────────────
+// Pantallas del panel de administrador. Todas siguen el mismo patrón:
+//   @AndroidEntryPoint   habilita que Hilt inyecte dependencias en este
+//       Fragment (necesario para que `by viewModels()` pueda resolver el
+//       ViewModel y sus propias dependencias inyectadas).
+//   View Binding (`_binding` / `binding`)  en vez de `findViewById`, Android
+//       genera una clase `FragmentXxxBinding` con una propiedad por cada
+//       vista del layout XML, con seguridad de tipos en tiempo de
+//       compilación. `_binding` es nullable y se limpia en onDestroyView
+//       porque la vista del Fragment se destruye antes que el Fragment
+//       mismo (para no dejar una referencia fuga a una vista muerta); el
+//       getter `binding` (sin guion bajo) es el que se usa en el resto del
+//       código y solo es válido mientras la vista exista.
+//   by viewModels() / by activityViewModels()  piden el ViewModel a Hilt.
+//       `viewModels()` crea uno propio de este Fragment; `activityViewModels()`
+//       reutiliza el mismo que cualquier otro Fragment de la misma Activity
+//       que lo pida (necesario para AuthViewModel, que debe reflejar el
+//       mismo estado de sesión en todas las pantallas).
+// ─────────────────────────────────────────────────────────────────────────
+
 // ─────────────────────────────────────────────
 // ADMIN DASHBOARD
 // ─────────────────────────────────────────────
@@ -30,7 +52,7 @@ class AdminDashboardFragment : Fragment() {
     private var _binding: FragmentAdminDashboardBinding? = null
     private val binding get() = _binding!!
     private val productoViewModel: AdminProductosViewModel by viewModels()
-    private val authViewModel: AuthViewModel by viewModels()
+    private val authViewModel: AuthViewModel by activityViewModels()
 
     override fun onCreateView(i: LayoutInflater, c: ViewGroup?, s: Bundle?) =
         FragmentAdminDashboardBinding.inflate(i, c, false).also { _binding = it }.root
@@ -62,7 +84,11 @@ class AdminDashboardFragment : Fragment() {
         }
         binding.btnCerrarSesion.setOnClickListener {
             authViewModel.cerrarSesion()
-            findNavController().navigate(R.id.loginFragment)
+            // popUpTo el grafo completo: al cerrar sesión no debe quedar
+            // nada del panel de admin en la pila de retroceso.
+            findNavController().navigate(R.id.loginFragment, null, navOptions {
+                popUpTo(findNavController().graph.id) { inclusive = true }
+            })
         }
     }
 
@@ -72,6 +98,7 @@ class AdminDashboardFragment : Fragment() {
 // ─────────────────────────────────────────────
 // ADMIN PRODUCTOS
 // ─────────────────────────────────────────────
+/** Lista de inventario con buscador, edición y botón para agregar stock por producto. */
 @AndroidEntryPoint
 class AdminProductosFragment : Fragment() {
 
@@ -116,6 +143,7 @@ class AdminProductosFragment : Fragment() {
         }
     }
 
+    /** Diálogo simple para capturar cuántas unidades reabastecer de un producto. */
     private fun mostrarDialogoStock(producto: Producto) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_agregar_stock, null)
         val etCantidad = dialogView.findViewById<TextInputEditText>(R.id.et_cantidad)
@@ -142,6 +170,7 @@ class AdminProductosFragment : Fragment() {
 // ─────────────────────────────────────────────
 // ADMIN USUARIOS
 // ─────────────────────────────────────────────
+/** Lista de cuentas registradas, con acción para activar/desactivar y un diálogo para dar de alta nuevas. */
 @AndroidEntryPoint
 class AdminUsuariosFragment : Fragment() {
 
@@ -208,6 +237,11 @@ class AdminUsuariosFragment : Fragment() {
 // ─────────────────────────────────────────────
 // NUEVO/EDITAR PRODUCTO FRAGMENT
 // ─────────────────────────────────────────────
+/**
+ * Formulario único para dar de alta un producto o editar uno existente:
+ * `productoExistente` (recibido por argumento de navegación) decide cuál
+ * de los dos modos usar y precarga los campos si aplica.
+ */
 @AndroidEntryPoint
 class EditarProductoFragment : Fragment() {
 
@@ -262,6 +296,7 @@ class EditarProductoFragment : Fragment() {
         binding.btnGuardar.setOnClickListener { guardar() }
     }
 
+    /** Valida el formulario y arma el `Producto` (nuevo o copia editada) antes de guardarlo. */
     private fun guardar() {
         val nombre = binding.etNombre.text.toString().trim()
         val precio = binding.etPrecio.text.toString().toDoubleOrNull()

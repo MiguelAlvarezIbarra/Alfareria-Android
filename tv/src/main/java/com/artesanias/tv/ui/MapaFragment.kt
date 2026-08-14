@@ -17,6 +17,7 @@ import com.artesanias.tv.databinding.FragmentMapaBinding
  * semanas atrás) y eso invalidaba el certificado TLS de Google, colgando la
  * carga sin ningún error visible; una vez corregido el reloj del emulador
  * el mapa carga con normalidad.
+ * 
  *
  * Las coordenadas son las mismas regiones que en TalleresFragment del
  * módulo de teléfono (app/ui/store/TalleresFragment.kt).
@@ -33,16 +34,27 @@ class MapaFragment : Fragment() {
         return binding.root
     }
 
+    // @SuppressLint("SetJavaScriptEnabled"): silencia la advertencia del
+    // linter de Android sobre habilitar JavaScript (un riesgo de
+    // seguridad en general, si el WebView cargara contenido de terceros
+    // no confiable); aquí es seguro porque el HTML lo genera esta misma
+    // app, no viene de una fuente externa.
     @SuppressLint("SetJavaScriptEnabled")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         binding.webView.settings.javaScriptEnabled = true
         binding.webView.settings.domStorageEnabled = true
         binding.webView.webChromeClient = WebChromeClient()
+        // loadDataWithBaseURL con baseURL "https://maps.googleapis.com":
+        // carga el HTML/JS generado localmente (no una URL real), pero le
+        // dice al WebView que lo trate como si viniera de ese origen, para
+        // que las peticiones que el script de Google Maps haga por debajo
+        // (tiles, API) no choquen con las reglas de mismo-origen del navegador.
         binding.webView.loadDataWithBaseURL(
             "https://maps.googleapis.com", html(), "text/html", "utf-8", null
         )
     }
 
+    /** Arma la página HTML+JavaScript que dibuja el mapa con los 7 pines de talleres artesanales. */
     private fun html(): String = """
         <!DOCTYPE html>
         <html>

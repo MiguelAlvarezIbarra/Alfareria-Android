@@ -27,17 +27,30 @@ import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
+/**
+ * Pantalla de cámara con dos modos, usando CameraX (la librería de Jetpack
+ * que envuelve la Camera2 API de Android con un ciclo de vida más simple):
+ * - Modo foto: captura la imagen de un producto nuevo y la pasa al
+ *   formulario de alta (EditarProductoFragment) por la ruta del archivo.
+ * - Modo QR: captura una imagen, la decodifica con ZXing (la librería de
+ *   lectura de códigos QR/barras) y extrae el nodeId del reloj Wear OS
+ *   para emparejarlo.
+ */
 @AndroidEntryPoint
 class CamaraFragment : Fragment() {
 
     private var _binding: FragmentCamaraBinding? = null
     private val binding get() = _binding!!
 
+    // Hilo dedicado para las operaciones de CameraX (captura, guardado):
+    // no deben correr en el hilo principal para no congelar la UI.
     private lateinit var cameraExecutor: ExecutorService
     private var imageCapture: ImageCapture? = null
     private var modoQR = false   // false = foto producto, true = scan QR
 
-    // Launcher de permisos de cámara
+    // Launcher de permisos de cámara: registra el flujo estándar de
+    // Android para pedir un permiso en tiempo de ejecución y recibir la
+    // respuesta del usuario (concedido o no) sin bloquear la UI.
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -87,6 +100,7 @@ class CamaraFragment : Fragment() {
         }
     }
 
+    /** Abre la cámara trasera y conecta su vista previa al `viewFinder` del layout. */
     private fun iniciarCamara() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         cameraProviderFuture.addListener({
@@ -158,6 +172,13 @@ class CamaraFragment : Fragment() {
         )
     }
 
+    /**
+     * Decodifica el QR de la foto recién tomada usando ZXing: convierte el
+     * bitmap a una matriz de píxeles (`RGBLuminanceSource`), la binariza
+     * (blanco/negro) y se la pasa al lector genérico de códigos
+     * (`MultiFormatReader`), que reconoce el patrón del QR y devuelve el
+     * texto que codifica.
+     */
     private fun procesarQR(archivo: File) {
         try {
             val bitmap = BitmapFactory.decodeFile(archivo.absolutePath)

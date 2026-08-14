@@ -9,6 +9,14 @@ import kotlinx.coroutines.flow.asStateFlow
  * Estado en memoria de la TV. Arranca con datos de demostración para que las
  * pantallas no se vean vacías si el teléfono todavía no se ha conectado, y
  * se sobreescribe con datos reales en cuanto TvServer recibe el primer sync.
+ *
+ * `StateFlow` vs `SharedFlow`: un `StateFlow` siempre tiene un valor actual
+ * (aquí, el último catálogo/ranking/tabla recibido) y se lo entrega de
+ * inmediato a cualquier pantalla que empiece a observarlo, ideal para
+ * "estado" que se puede volver a mostrar. Un `SharedFlow` con `replay = 0`
+ * (como `compraGrandeEvents` más abajo) no guarda nada: solo notifica a
+ * quien esté escuchando EN ESE MOMENTO, correcto para una alerta puntual
+ * que no debe "repetirse sola" si la pantalla se vuelve a abrir después.
  */
 object TvDataStore {
 

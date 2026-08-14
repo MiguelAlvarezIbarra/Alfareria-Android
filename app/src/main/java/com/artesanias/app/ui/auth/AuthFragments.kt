@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import com.artesanias.app.R
 import com.artesanias.app.data.model.RolUsuario
 import com.artesanias.app.databinding.FragmentLoginBinding
@@ -20,6 +21,7 @@ import dagger.hilt.android.AndroidEntryPoint
 // ─────────────────────────────────────────────
 // LOGIN FRAGMENT
 // ─────────────────────────────────────────────
+/** Pantalla de inicio de sesión: valida el formulario y, según el rol del usuario autenticado, navega al panel de admin o a la tienda. */
 @AndroidEntryPoint
 class LoginFragment : Fragment() {
 
@@ -39,13 +41,23 @@ class LoginFragment : Fragment() {
         }
 
         viewModel.loginResult.observe(viewLifecycleOwner) { result ->
+            // El guard `result == null` es necesario porque loginResult es
+            // nullable a propósito (ver AuthViewModel): al llegar aquí por
+            // primera vez su valor inicial es null y no hay nada que hacer.
+            if (result == null) return@observe
             result.onSuccess { usuario ->
                 val dest = if (usuario.rol == RolUsuario.ADMIN)
                     R.id.adminDashboardFragment else R.id.tiendaFragment
-                findNavController().navigate(dest)
+                // popUpTo(loginFragment, inclusive=true): quita esta
+                // pantalla de la pila al entrar, para que el botón "atrás"
+                // desde Tienda/AdminDashboard no regrese al login.
+                findNavController().navigate(dest, null, navOptions {
+                    popUpTo(R.id.loginFragment) { inclusive = true }
+                })
             }.onFailure { e ->
                 Toast.makeText(requireContext(), e.message ?: "Error al iniciar sesión", Toast.LENGTH_LONG).show()
             }
+            viewModel.consumirLoginResult()
         }
 
         binding.btnLogin.setOnClickListener {
@@ -75,6 +87,7 @@ class LoginFragment : Fragment() {
 // ─────────────────────────────────────────────
 // REGISTRO FRAGMENT
 // ─────────────────────────────────────────────
+/** Formulario de alta de cuenta nueva (siempre como CLIENTE; los admins solo se crean desde el panel de administración). */
 @AndroidEntryPoint
 class RegistroFragment : Fragment() {
 
@@ -94,12 +107,14 @@ class RegistroFragment : Fragment() {
         }
 
         viewModel.registerResult.observe(viewLifecycleOwner) { result ->
+            if (result == null) return@observe
             result.onSuccess {
                 Toast.makeText(requireContext(), "¡Cuenta creada! Inicia sesión", Toast.LENGTH_LONG).show()
                 findNavController().popBackStack()
             }.onFailure { e ->
                 Toast.makeText(requireContext(), e.message ?: "Error al registrar", Toast.LENGTH_LONG).show()
             }
+            viewModel.consumirRegisterResult()
         }
 
         binding.btnRegistrar.setOnClickListener {

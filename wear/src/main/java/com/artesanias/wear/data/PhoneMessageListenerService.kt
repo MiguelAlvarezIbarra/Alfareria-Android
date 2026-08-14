@@ -19,10 +19,20 @@ import com.artesanias.wear.presentation.StockResultadoActivity
 import com.google.android.gms.wearable.MessageEvent
 import com.google.android.gms.wearable.WearableListenerService
 
+/**
+ * `WearableListenerService` es una clase base de Google Play Services que
+ * el sistema instancia automáticamente cuando llega un mensaje del
+ * teléfono cuyo "path" coincide con alguno de los `<intent-filter>`
+ * declarados para este servicio en el AndroidManifest.xml de este módulo.
+ * Es el equivalente, en la dirección teléfono → reloj, de
+ * WearableDataListenerService en el módulo de teléfono.
+ */
 class PhoneMessageListenerService : WearableListenerService() {
 
     private val TAG = "WearListener"
     private val CHANNEL_ID = "artesanias_wear_channel"
+    // Cada notificación necesita un id distinto para no reemplazar a la
+    // anterior en la bandeja del sistema; se incrementa en mostrarNotificacion().
     private var notifId = 0
 
     override fun onCreate() {
@@ -30,12 +40,15 @@ class PhoneMessageListenerService : WearableListenerService() {
         crearCanal()
     }
 
+    /** Se llama automáticamente cada vez que el teléfono manda un mensaje al reloj. */
     override fun onMessageReceived(messageEvent: MessageEvent) {
         val datos = String(messageEvent.data, Charsets.UTF_8)
         Log.d(TAG, "Mensaje recibido: ${messageEvent.path} -> $datos")
 
         when (messageEvent.path) {
 
+            // El teléfono avisó que un producto quedó con poco stock.
+            // Formato del mensaje: "productoId:nombre:stock".
             "/alerta/stock" -> {
                 val partes = datos.split(":")
                 if (partes.size >= 3) {
@@ -44,6 +57,10 @@ class PhoneMessageListenerService : WearableListenerService() {
                     val stock = partes[2].toIntOrNull() ?: 0
                     val mensajeVisible = "⚠️ $nombre\nSolo $stock unidades en stock"
 
+                    // Actualiza (o agrega) este producto en la lista en
+                    // memoria compartida con StockListActivity, para que
+                    // la pantalla "Ajustar Inventario" quede consistente
+                    // sin tener que volver a pedirle todo al teléfono.
                     val yaExiste = StockListActivity.productosStockBajo.any { it.id == productoId }
                     if (!yaExiste && productoId != -1) {
                         StockListActivity.productosStockBajo.add(
@@ -79,6 +96,10 @@ class PhoneMessageListenerService : WearableListenerService() {
                 }
             }
 
+            // Respuesta del teléfono a la solicitud "/stock/lista" (ver
+            // StockListActivity): reemplaza toda la lista en memoria con
+            // el inventario bajo en stock más reciente. Formato:
+            // "id:nombre:stock|id:nombre:stock|..." (vacío si no hay ninguno).
             "/stock/lista/respuesta" -> {
                 StockListActivity.productosStockBajo.clear()
                 if (datos.isNotBlank()) {
@@ -149,6 +170,13 @@ class PhoneMessageListenerService : WearableListenerService() {
         }
     }
 
+    /**
+     * Vibración corta (300ms) para alertas de stock bajo. La rama por
+     * versión de Android existe porque `VibratorManager` (la forma actual
+     * de pedir el vibrador) solo existe desde Android 12 (S); en
+     * versiones anteriores hay que usar la clase `Vibrator` directa, que
+     * Google marcó como obsoleta pero sigue siendo la única opción ahí.
+     */
     private fun vibrarCorto() {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -171,6 +199,7 @@ class PhoneMessageListenerService : WearableListenerService() {
         }
     }
 
+    /** Patrón de vibración largo e intermitente, reservado para la alerta de compra grande. */
     private fun vibrarLargo() {
         try {
             val patron = longArrayOf(0, 400, 200, 400, 200, 400)
@@ -192,6 +221,11 @@ class PhoneMessageListenerService : WearableListenerService() {
         }
     }
 
+    /**
+     * Publica una notificación del sistema en el reloj. `pendingIntent`
+     * (si se da) hace que tocar la notificación abra la Activity
+     * correspondiente, igual que tocar la alerta que ya está en pantalla.
+     */
     private fun mostrarNotificacion(titulo: String, mensaje: String, pendingIntent: PendingIntent?) {
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_alert)
@@ -207,6 +241,12 @@ class PhoneMessageListenerService : WearableListenerService() {
         nm.notify(notifId++, builder.build())
     }
 
+    /**
+     * Los canales de notificación (`NotificationChannel`) son obligatorios
+     * desde Android 8 (Oreo): agrupan notificaciones bajo una categoría
+     * que el usuario puede silenciar o ajustar desde Ajustes, sin afectar
+     * a otras. Se crea una sola vez, al arrancar el servicio.
+     */
     private fun crearCanal() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val canal = NotificationChannel(

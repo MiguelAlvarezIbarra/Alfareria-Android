@@ -14,6 +14,14 @@ import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
 
+/**
+ * Única Activity de la app de TV: no usa Navigation Component (a
+ * diferencia del módulo de teléfono), solo cambia manualmente el
+ * Fragment visible dentro de `fragmentContainer` según el ítem del riel
+ * de navegación lateral que se seleccione (ver `mostrarPantalla`). También
+ * escucha, mientras viva la Activity, el evento global de "compra grande"
+ * para mostrar la alerta encima de cualquier pantalla que esté activa.
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
@@ -47,6 +55,7 @@ class MainActivity : AppCompatActivity() {
 
     private var dialogoCompraGrande: android.app.Dialog? = null
 
+    /** Muestra (o reemplaza, si ya había una) la tarjeta de alerta, y la oculta sola a los 8 segundos. */
     private fun mostrarNotificacionCompraGrande(evento: com.artesanias.tv.data.TvCompraGrandeEvent) {
         dialogoCompraGrande?.dismiss()
         ocultarOverlay.removeCallbacksAndMessages(null)
@@ -68,6 +77,7 @@ class MainActivity : AppCompatActivity() {
         ocultarOverlay.postDelayed(8000) { dialog.dismiss() }
     }
 
+    /** Reemplaza la pantalla activa y resalta el ítem correspondiente del riel de navegación. */
     private fun mostrarPantalla(fragment: Fragment, itemSeleccionado: android.view.View) {
         supportFragmentManager.beginTransaction()
             .replace(binding.fragmentContainer.id, fragment)

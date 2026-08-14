@@ -13,9 +13,26 @@ import com.artesanias.app.util.formatearPrecio
 import com.bumptech.glide.Glide
 import java.io.File
 
+// ─────────────────────────────────────────────────────────────────────────
+// Adaptadores de RecyclerView: convierten una lista de datos en las filas
+// visibles de una lista/grilla. Patrón usado en todos:
+//   ViewHolder (clase "VH")  guarda las referencias a las vistas de una
+//       fila ya infladas (por View Binding), para no tener que buscarlas
+//       de nuevo cada vez que esa fila se reutiliza al hacer scroll.
+//   onCreateViewHolder  infla el layout XML de una fila nueva.
+//   onBindViewHolder  llena una fila (ya existente o reciclada) con los
+//       datos del ítem que le toca mostrar.
+//   ListAdapter + DiffUtil.ItemCallback  variante de RecyclerView.Adapter
+//       que, al recibir una lista nueva con `submitList`, compara contra
+//       la lista anterior en un hilo de fondo y solo re-dibuja las filas
+//       que realmente cambiaron (más eficiente que `notifyDataSetChanged`,
+//       que redibuja toda la lista sin importar qué cambió).
+// ─────────────────────────────────────────────────────────────────────────
+
 // ─────────────────────────────────────────────
 // ADAPTADOR TIENDA (cliente)
 // ─────────────────────────────────────────────
+/** Grilla de productos de la tienda, con botón "Agregar" al carrito y tap para ver el detalle. */
 class ProductoAdapter(
     private val onAgregar: (Producto) -> Unit,
     private val onClick: (Producto) -> Unit
@@ -49,7 +66,9 @@ class ProductoAdapter(
                 if (p.stockBajo) 0xFFE53935.toInt() else 0xFF43A047.toInt()
             )
 
-            // Imagen
+            // Imagen: Glide carga y cachea el bitmap desde el archivo local
+            // tomado con la cámara (ver CamaraFragment) de forma asíncrona,
+            // sin bloquear el hilo principal ni recargarla en cada scroll.
             if (p.imagenPath.isNotBlank()) {
                 Glide.with(b.root).load(File(p.imagenPath)).into(b.ivProducto)
             } else {
@@ -77,6 +96,7 @@ class ProductoAdapter(
 // ─────────────────────────────────────────────
 // ADAPTADOR ADMIN PRODUCTOS
 // ─────────────────────────────────────────────
+/** Lista de inventario para el panel de admin: muestra estado activo/inactivo y alerta de stock bajo. */
 class ProductoAdminAdapter(
     private val onEditar: (Producto) -> Unit,
     private val onAgregarStock: (Producto) -> Unit
@@ -126,6 +146,7 @@ class ProductoAdminAdapter(
 // ─────────────────────────────────────────────
 // ADAPTADOR USUARIOS (admin)
 // ─────────────────────────────────────────────
+/** Lista de cuentas para el panel de admin, con un switch para activar/desactivar cada una. */
 class UsuarioAdapter(
     private val onToggleActivo: (com.artesanias.app.data.model.Usuario) -> Unit
 ) : ListAdapter<com.artesanias.app.data.model.Usuario, UsuarioAdapter.VH>(
@@ -155,6 +176,13 @@ class UsuarioAdapter(
 // ─────────────────────────────────────────────
 // ADAPTADOR CARRITO
 // ─────────────────────────────────────────────
+/**
+ * Lista del carrito, con controles de +/- cantidad y eliminar por línea.
+ * A diferencia de los adaptadores de arriba, extiende `RecyclerView.Adapter`
+ * directo (no `ListAdapter`) porque el carrito es una lista pequeña que
+ * cambia por completo en cada actualización: no vale la pena el cálculo de
+ * diffs, basta con `notifyDataSetChanged()`.
+ */
 class CarritoAdapter(
     private val onMasCantidad: (com.artesanias.app.data.model.ItemCarrito) -> Unit,
     private val onMenosCantidad: (com.artesanias.app.data.model.ItemCarrito) -> Unit,

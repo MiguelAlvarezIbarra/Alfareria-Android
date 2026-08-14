@@ -30,15 +30,25 @@ object TvServer {
     const val PUERTO = 8766
     private const val TAG = "TvServer"
 
+    // Evita levantar el servidor dos veces si iniciar() se llama más de
+    // una vez (p.ej. si TvApplication.onCreate se disparara de nuevo).
     private var iniciado = false
 
+    /** Abre el ServerSocket y arranca el ciclo de aceptar conexiones; no bloquea al que lo llama. */
     fun iniciar(scope: CoroutineScope) {
         if (iniciado) return
         iniciado = true
+        // Dispatchers.IO: hilo pensado para operaciones bloqueantes de
+        // entrada/salida (sockets, disco), para no usar el hilo principal.
         scope.launch(Dispatchers.IO) {
             try {
                 ServerSocket(PUERTO).use { serverSocket ->
                     Log.i(TAG, "Escuchando en puerto $PUERTO")
+                    // serverSocket.accept() bloquea hasta que llega una
+                    // conexión nueva; cada una se atiende en su propia
+                    // corrutina para poder seguir aceptando otras mientras
+                    // tanto (el teléfono manda varios mensajes seguidos,
+                    // cada uno en su propia conexión corta).
                     while (true) {
                         val socket = serverSocket.accept()
                         launch(Dispatchers.IO) { manejarCliente(socket) }
@@ -50,6 +60,7 @@ object TvServer {
         }
     }
 
+    /** Lee líneas del socket (un JSON por línea) hasta que el teléfono cierra la conexión. */
     private suspend fun manejarCliente(socket: Socket) {
         socket.use {
             try {

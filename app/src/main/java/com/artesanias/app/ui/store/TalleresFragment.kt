@@ -48,10 +48,17 @@ class TalleresFragment : Fragment(), com.google.android.gms.maps.OnMapReadyCallb
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // SupportMapFragment vive DENTRO de este Fragment (un Fragment
+        // anidado dentro de otro), así que se busca con
+        // `childFragmentManager` (el manejador de fragmentos hijos de
+        // ESTE Fragment) y no con el de la Activity. `getMapAsync` carga
+        // el mapa en segundo plano y avisa por `onMapReady` cuando ya se
+        // puede dibujar sobre él.
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }
 
+    /** Se llama una sola vez, cuando el SDK de Google Maps ya terminó de inicializar el mapa. */
     override fun onMapReady(googleMap: GoogleMap) {
         mapa = googleMap
         viewModel.productos.observe(viewLifecycleOwner) { productos ->

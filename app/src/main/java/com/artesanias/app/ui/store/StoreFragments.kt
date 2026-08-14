@@ -26,6 +26,7 @@ import dagger.hilt.android.AndroidEntryPoint
 // ─────────────────────────────────────────────
 // TIENDA FRAGMENT
 // ─────────────────────────────────────────────
+/** Catálogo de productos del cliente: grilla con buscador, agregar al carrito y ver detalle. */
 @AndroidEntryPoint
 class TiendaFragment : Fragment() {
 
@@ -113,6 +114,7 @@ class TiendaFragment : Fragment() {
 // ─────────────────────────────────────────────
 // CARRITO FRAGMENT
 // ─────────────────────────────────────────────
+/** Resumen del carrito y flujo de compra: pide confirmación extra si el total supera $1,000 MXN. */
 @AndroidEntryPoint
 class CarritoFragment : Fragment() {
 
@@ -207,6 +209,7 @@ class CarritoFragment : Fragment() {
 // ─────────────────────────────────────────────
 // MIS ORDENES FRAGMENT (cliente)
 // ─────────────────────────────────────────────
+/** Historial de compras del cliente autenticado, ordenadas de más reciente a más antigua. */
 @AndroidEntryPoint
 class MisOrdenesFragment : Fragment() {
 

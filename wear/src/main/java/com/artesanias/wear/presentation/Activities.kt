@@ -28,12 +28,22 @@ import kotlinx.coroutines.tasks.await
 // ─────────────────────────────────────────────
 // MAIN ACTIVITY
 // ─────────────────────────────────────────────
+/**
+ * Pantalla principal del reloj. Usa `ComponentActivity` (no
+ * `AppCompatActivity`/Compose) porque el layout es un XML clásico simple;
+ * este módulo no usa Navigation Component, cada pantalla es una Activity
+ * separada que se abre con `startActivity`, ya sea desde aquí o desde
+ * PhoneMessageListenerService al recibir un mensaje del teléfono.
+ */
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_wear)
 
+        // Desde Android 13 (Tiramisu) las notificaciones requieren permiso
+        // explícito en tiempo de ejecución; en versiones anteriores se
+        // conceden solo con declararlas en el manifest.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -49,6 +59,9 @@ class MainActivity : ComponentActivity() {
 
         tvEstado.text = "Artesanías Wear\nEsperando conexión..."
 
+        // Botón de prueba de conexión: pide los nodos (teléfonos)
+        // emparejados vía Wearable Data Layer y, si hay alguno, le manda
+        // un mensaje "/ping" para confirmar que la comunicación funciona.
         btnPing.setOnClickListener {
             lifecycleScope.launch {
                 try {
@@ -80,9 +93,19 @@ class MainActivity : ComponentActivity() {
 // ─────────────────────────────────────────────
 // LISTA DE PRODUCTOS CON STOCK BAJO
 // ─────────────────────────────────────────────
+/**
+ * Pantalla "Ajustar Inventario": lista los productos con poco stock que el
+ * teléfono ha ido reportando. Al tocar uno abre StockAlertActivity para
+ * pedir más unidades.
+ */
 class StockListActivity : ComponentActivity() {
 
     companion object {
+        // Lista en memoria compartida entre esta Activity y
+        // PhoneMessageListenerService: el servicio la llena/actualiza
+        // cuando llegan mensajes del teléfono, y esta Activity solo la
+        // lee y la dibuja. Vive mientras el proceso del reloj esté vivo
+        // (no sobrevive un reinicio del sistema, pero no lo necesita).
         val productosStockBajo = mutableListOf<ProductoStockItem>()
     }
 
@@ -90,6 +113,9 @@ class StockListActivity : ComponentActivity() {
     private lateinit var tvSinProductos: TextView
     private lateinit var rv: WearableRecyclerView
 
+    // Se dispara cuando PhoneMessageListenerService modifica
+    // productosStockBajo y avisa con un broadcast local, para refrescar
+    // la lista sin tener que volver a pedirle nada al teléfono.
     private val stockReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             actualizarVista()
@@ -112,6 +138,9 @@ class StockListActivity : ComponentActivity() {
         }
 
         rv.apply {
+            // isEdgeItemsCenteringEnabled: comportamiento típico de listas
+            // en reloj circular/redondo, centra el primer y último item
+            // en vez de dejarlos pegados al borde de la pantalla.
             isEdgeItemsCenteringEnabled = true
             layoutManager = LinearLayoutManager(this@StockListActivity)
             adapter = this@StockListActivity.adapter
@@ -134,6 +163,7 @@ class StockListActivity : ComponentActivity() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(stockReceiver)
     }
 
+    /** Pide al teléfono la lista completa de productos con stock bajo (mensaje "/stock/lista"). */
     private fun solicitarListaStock() {
         lifecycleScope.launch {
             try {
@@ -157,6 +187,9 @@ class StockListActivity : ComponentActivity() {
                         .await()
                 }
 
+                // La respuesta llega asíncrona por PhoneMessageListenerService
+                // ("/stock/lista/respuesta"); si ya había datos en memoria de
+                // antes, se muestran de inmediato mientras llega la respuesta fresca.
                 if (productosStockBajo.isNotEmpty()) actualizarVista()
 
             } catch (e: Exception) {
@@ -179,12 +212,14 @@ class StockListActivity : ComponentActivity() {
         }
     }
 
+    /** Punto de entrada público usado por PhoneMessageListenerService para refrescar la vista si esta Activity está visible. */
     fun refrescarLista() = actualizarVista()
 }
 
 // ─────────────────────────────────────────────
 // DATA CLASS para item de stock
 // ─────────────────────────────────────────────
+/** Representación mínima de un producto con stock bajo, tal como la maneja el reloj (sin el resto de campos del modelo completo del teléfono). */
 data class ProductoStockItem(
     val id: Int,
     val nombre: String,
@@ -194,6 +229,7 @@ data class ProductoStockItem(
 // ─────────────────────────────────────────────
 // ADAPTER de la lista
 // ─────────────────────────────────────────────
+/** Adapter de RecyclerView clásico (no ListAdapter/DiffUtil) para la lista de productos con stock bajo; la lista es corta y se reconstruye completa con notifyDataSetChanged() cada vez. */
 class StockProductoAdapter(
     private val items: List<ProductoStockItem>,
     private val onClick: (ProductoStockItem) -> Unit
@@ -215,6 +251,8 @@ class StockProductoAdapter(
         val item = items[position]
         holder.tvNombre.text = item.nombre
 
+        // Rojo para "sin stock" (0 unidades), naranja para "stock bajo"
+        // (>0 pero por debajo del umbral que ya filtró el teléfono).
         if (item.stock == 0) {
             holder.tvStock.text = "⛔ Sin stock"
             holder.tvStock.setTextColor(Color.parseColor("#F44336"))
@@ -236,6 +274,7 @@ class StockProductoAdapter(
 // ─────────────────────────────────────────────
 // ALERTA DE STOCK BAJO (individual)
 // ─────────────────────────────────────────────
+/** Pantalla que se abre automáticamente (desde PhoneMessageListenerService) o al tocar un item en StockListActivity, para pedir que se agreguen unidades a un producto específico. */
 class StockAlertActivity : ComponentActivity() {
 
     private var productoId: Int = -1
@@ -266,6 +305,7 @@ class StockAlertActivity : ComponentActivity() {
         btnCancelar.setOnClickListener { finish() }
     }
 
+    /** Envía al teléfono la orden de agregar `cantidad` unidades al producto `productoId` (mensaje "/stock/agregar"). */
     private fun enviarComandoStock(productoId: Int, cantidad: Int) {
         lifecycleScope.launch {
             try {
@@ -287,6 +327,9 @@ class StockAlertActivity : ComponentActivity() {
                         ).await()
                 }
 
+                // Optimista: se quita de la lista local antes de que el
+                // teléfono confirme, para que StockListActivity no siga
+                // mostrando un producto que ya se está resolviendo.
                 StockListActivity.productosStockBajo.removeAll { it.id == productoId }
 
                 Toast.makeText(
@@ -311,6 +354,13 @@ class StockAlertActivity : ComponentActivity() {
 // Ahora recibe el detalle de productos comprados
 // y al confirmar verifica el stock resultante
 // ─────────────────────────────────────────────
+/**
+ * Pantalla de alerta cuando el cliente hace una compra grande ($500+ MXN).
+ * Tiene dos modos según el mensaje recibido:
+ *  - Aviso informativo (compra $500-$1000): solo se muestra, botón "Entendido".
+ *  - Confirmación requerida (compra >$1000): el reloj debe confirmar la
+ *    orden explícitamente antes de que se procese del todo.
+ */
 class CompraAlertActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -363,6 +413,7 @@ class CompraAlertActivity : ComponentActivity() {
         btnDesestimar.setOnClickListener { finish() }
     }
 
+    /** Manda al teléfono el mensaje "/orden/confirmar" con el id de la orden para que la procese del todo. */
     private fun confirmarOrden(ordenId: Int) {
         lifecycleScope.launch {
             try {
@@ -383,6 +434,7 @@ class CompraAlertActivity : ComponentActivity() {
         }
     }
 
+    /** Extrae el número de orden del texto del mensaje (formato "...#123..."), o -1 si no lo encuentra. */
     private fun extraerOrdenId(mensaje: String): Int {
         return try {
             Regex("#(\\d+)").find(mensaje)?.groupValues?.get(1)?.toInt() ?: -1
@@ -397,6 +449,7 @@ class CompraAlertActivity : ComponentActivity() {
 // suficiente o bajo, y en ese caso ofrece ir
 // a agregar más unidades.
 // ─────────────────────────────────────────────
+/** Pantalla de cierre del flujo de compra grande: informa si el stock quedó suficiente o si algún producto quedó bajo, con acceso directo a StockAlertActivity para reabastecer. */
 class StockResultadoActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

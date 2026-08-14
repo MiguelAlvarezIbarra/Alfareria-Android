@@ -34,6 +34,12 @@ import javax.inject.Singleton
  * (el portproxy ya no es necesario para este flujo por USB, pero se deja
  * documentado por si se vuelve a usar WiFi en una red sin aislamiento).
  * El celular debe permanecer conectado por USB para que esto funcione.
+ *
+ * `@Singleton` + `@Inject constructor()`: le dice a Hilt (el framework de
+ * inyección de dependencias) que exista una sola instancia de esta clase
+ * en toda la app, compartida por quien la pida en su constructor (aquí no
+ * se necesita porque no tiene estado que valga la pena compartir, pero es
+ * el patrón consistente con el resto de los repositorios/servicios).
  */
 @Singleton
 class TvDataSender @Inject constructor() {
@@ -65,6 +71,7 @@ class TvDataSender @Inject constructor() {
         }
     }
 
+    /** Manda el catálogo completo (solo productos activos) a la Pantalla 1 de la TV. */
     suspend fun enviarCatalogo(productos: List<Producto>) {
         val items = JSONArray()
         productos.filter { it.activo }.forEach { p ->
@@ -81,6 +88,7 @@ class TvDataSender @Inject constructor() {
         })
     }
 
+    /** Manda el top de productos más vendidos para la gráfica de barras de la Pantalla 2. */
     suspend fun enviarMasVendidos(items: List<VentaProducto>) {
         val arr = JSONArray()
         items.forEach { v ->
@@ -95,6 +103,7 @@ class TvDataSender @Inject constructor() {
         })
     }
 
+    /** Manda la tabla de compras de los últimos 7 días para la Pantalla 2. */
     suspend fun enviarComprasSemana(items: List<CompraResumen>) {
         val formatoDia = SimpleDateFormat("EEE", Locale("es", "MX"))
         val arr = JSONArray()
@@ -111,6 +120,7 @@ class TvDataSender @Inject constructor() {
         })
     }
 
+    /** Dispara la alerta de "compra grande" que la TV muestra como overlay sobre cualquier pantalla. */
     suspend fun enviarCompraGrande(producto: String, monto: Double) {
         enviar(JSONObject().apply {
             put("tipo", "compra_grande")

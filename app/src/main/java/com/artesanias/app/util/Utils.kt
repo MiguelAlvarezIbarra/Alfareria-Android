@@ -11,15 +11,25 @@ import com.google.zxing.common.BitMatrix
 import java.security.MessageDigest
 
 // ───────────── HASH UTIL ─────────────
+/** Convierte una contraseña en su hash SHA-256 (en hexadecimal) para nunca guardarla en texto plano. */
 object HashUtil {
     fun hash(input: String): String {
         val digest = MessageDigest.getInstance("SHA-256")
         val hashBytes = digest.digest(input.toByteArray(Charsets.UTF_8))
+        // "%02x" formatea cada byte como 2 dígitos hexadecimales (00-ff);
+        // unidos, dan la representación de texto habitual de un hash.
         return hashBytes.joinToString("") { "%02x".format(it) }
     }
 }
 
 // ───────────── SESSION MANAGER ─────────────
+/**
+ * Guarda la sesión activa (quién inició sesión y con qué rol) en
+ * SharedPreferences, el almacén clave-valor persistente de Android — a
+ * diferencia de Room, no es para datos relacionales, sino para unos pocos
+ * valores simples que sobreviven a que se cierre la app. `MODE_PRIVATE`
+ * significa que solo esta app puede leer este archivo de preferencias.
+ */
 class SessionManager(context: Context) {
     private val prefs: SharedPreferences =
         context.getSharedPreferences("artesanias_session", Context.MODE_PRIVATE)
@@ -33,6 +43,9 @@ class SessionManager(context: Context) {
         const val NO_SESSION = -1
     }
 
+    // Todas son propiedades calculadas (`get()`): leen SharedPreferences
+    // en cada acceso, así que siempre reflejan el estado más reciente (no
+    // hay que "refrescar" nada manualmente tras guardarSesion/cerrarSesion).
     val isLoggedIn: Boolean get() = prefs.getBoolean(KEY_LOGGED_IN, false)
     val userId: Int get() = prefs.getInt(KEY_USER_ID, NO_SESSION)
     val userName: String get() = prefs.getString(KEY_USER_NAME, "") ?: ""
@@ -54,12 +67,14 @@ class SessionManager(context: Context) {
         }
     }
 
+    /** Borra toda la sesión guardada (equivalente a "cerrar sesión"). */
     fun cerrarSesion() {
         prefs.edit().clear().apply()
     }
 }
 
 // ───────────── QR UTIL ─────────────
+/** Generación y lectura de códigos QR (con la librería ZXing) para emparejar el reloj Wear OS. */
 object QRUtil {
     // Genera QR con el nodeId del teléfono para conectar Wear OS
     fun generarQRParaWear(nodeId: String, tamano: Int = 512): Bitmap {
@@ -67,6 +82,13 @@ object QRUtil {
         return generarQR(contenido, tamano)
     }
 
+    /**
+     * Codifica cualquier texto como una imagen de código QR. `BitMatrix`
+     * es la cuadrícula de bits (true = módulo negro, false = blanco) que
+     * ZXing genera a partir del texto; aquí se recorre pixel por pixel
+     * para convertirla en un `Bitmap` real que se pueda mostrar en un
+     * ImageView.
+     */
     fun generarQR(contenido: String, tamano: Int = 512): Bitmap {
         val writer = MultiFormatWriter()
         val bitMatrix: BitMatrix = writer.encode(contenido, BarcodeFormat.QR_CODE, tamano, tamano)
@@ -88,9 +110,16 @@ object QRUtil {
 }
 
 // ───────────── EXTENSIONES ÚTILES ─────────────
+// Funciones de extensión: le agregan un método a un tipo que ya existe
+// (Double, String) sin tener que heredar de él ni modificar su código
+// fuente. Se llaman igual que un método normal: `total.formatearPrecio()`.
+
+/** Formatea un monto como precio en pesos mexicanos, p.ej. `1234.5` → `"$1,234.50 MXN"`. */
 fun Double.formatearPrecio(): String = "\$${String.format("%,.2f", this)} MXN"
 
+/** Valida el formato de un correo usando el patrón estándar de Android (`Patterns.EMAIL_ADDRESS`). */
 fun String.isEmailValido(): Boolean =
     android.util.Patterns.EMAIL_ADDRESS.matcher(this).matches()
 
+/** Regla mínima de seguridad de contraseña para este proyecto: al menos 6 caracteres. */
 fun String.isPasswordSeguro(): Boolean = length >= 6

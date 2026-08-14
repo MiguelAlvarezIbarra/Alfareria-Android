@@ -8,6 +8,25 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.artesanias.app.data.model.*
 import com.artesanias.app.util.HashUtil
 
+/**
+ * Base de datos local de la app, implementada con Room (la capa de
+ * persistencia sobre SQLite que usa Android).
+ *
+ * Anotaciones de Room usadas aquí:
+ * - `@Database`: marca esta clase como la base de datos. `entities` lista
+ *   las tablas (una por cada `@Entity` en Models.kt); `version` es el
+ *   número de esquema (hay que subirlo si se cambian las tablas, junto con
+ *   una migración); `exportSchema = false` evita que Room genere un
+ *   archivo JSON del esquema en cada compilación (no se usa en este
+ *   proyecto porque no hay migraciones formales todavía).
+ * - `@TypeConverters`: registra la clase `Converters` de abajo, que le
+ *   enseña a Room a guardar tipos que SQLite no entiende de forma nativa
+ *   (aquí, los `enum class` como `RolUsuario` o `EstadoOrden`).
+ *
+ * La clase es `abstract`: Room genera en tiempo de compilación la
+ * implementación real de cada método `abstract fun ...Dao()`, devolviendo
+ * el DAO correspondiente ya conectado a esta base de datos.
+ */
 @Database(
     entities = [
         Usuario::class,
@@ -31,8 +50,17 @@ abstract class ArtesaniasDatabase : RoomDatabase() {
     abstract fun notificacionDao(): NotificacionDao
 
     companion object {
+        // @Volatile asegura que la escritura de INSTANCE sea visible de
+        // inmediato para todos los hilos (sin esto, un hilo podría ver una
+        // copia "cacheada" desactualizada y crear una segunda instancia).
         @Volatile private var INSTANCE: ArtesaniasDatabase? = null
 
+        /**
+         * Devuelve la única instancia de la base de datos (patrón
+         * singleton). El bloque `synchronized` evita que dos hilos
+         * construyan la base de datos al mismo tiempo si ambos llegan
+         * aquí antes de que `INSTANCE` se haya asignado.
+         */
         fun getInstance(context: Context): ArtesaniasDatabase =
             INSTANCE ?: synchronized(this) {
                 Room.databaseBuilder(context, ArtesaniasDatabase::class.java, "artesanias.db")
@@ -55,12 +83,23 @@ abstract class ArtesaniasDatabase : RoomDatabase() {
                     .also { INSTANCE = it }
             }
 
+        /**
+         * Inserta el usuario administrador, el cliente de prueba, las
+         * categorías y el catálogo inicial de productos la primera vez
+         * que se crea la base de datos (solo se ejecuta si el archivo
+         * `artesanias.db` no existía todavía en el dispositivo).
+         */
         private fun poblarDatosIniciales(db: SupportSQLiteDatabase) {
+            // Funciones locales auxiliares: arman el ContentValues (el
+            // formato fila-columna que espera SQLiteDatabase.insert) para
+            // cada tabla, para no repetir el `.apply { put(...) }` en cada
+            // fila de ejemplo de abajo.
             fun usuario(nombre: String, apellido: String, email: String, pass: String, rol: RolUsuario) =
                 ContentValues().apply {
                     put("nombre", nombre)
                     put("apellido", apellido)
                     put("email", email)
+                    // Nunca se guarda la contraseña en texto plano, solo su hash.
                     put("passwordHash", HashUtil.hash(pass))
                     put("rol", rol.name)
                     put("telefono", "")
@@ -92,14 +131,18 @@ abstract class ArtesaniasDatabase : RoomDatabase() {
                 put("fechaCreacion", System.currentTimeMillis())
             }
 
+            // CONFLICT_ABORT: si por alguna razón ya existiera una fila que
+            // choca (p.ej. mismo email), cancela esa inserción y lanza un
+            // error en vez de sobrescribir en silencio.
             fun insert(table: String, cv: ContentValues) =
                 db.insert(table, SQLiteDatabase.CONFLICT_ABORT, cv)
 
-            // Admin y cliente de prueba
+            // Admin y cliente de prueba (ver credenciales en el README)
             insert("usuarios", usuario("Administrador", "Sistema", "admin@artesanias.mx", "Admin123", RolUsuario.ADMIN))
             insert("usuarios", usuario("María", "González", "cliente@artesanias.mx", "Cliente123", RolUsuario.CLIENTE))
 
-            // Categorías
+            // Categorías. insert() devuelve el rowid autogenerado de cada
+            // una, que se reutiliza abajo como categoriaId de los productos.
             val catTalavera = insert("categorias", categoria("Talavera", "Cerámica tradicional de Puebla"))
             val catBarro = insert("categorias", categoria("Barro Negro", "Alfarería de Oaxaca"))
             val catMayolica = insert("categorias", categoria("Mayólica", "Cerámica esmaltada"))
@@ -142,7 +185,13 @@ abstract class ArtesaniasDatabase : RoomDatabase() {
     }
 }
 
-// Convertidores de tipos para Room
+/**
+ * Convertidores de tipos para Room: SQLite solo entiende tipos primitivos
+ * (texto, números, blobs), así que los `enum class` del modelo (que no son
+ * primitivos) necesitan una función de ida (`@TypeConverter` que los pasa
+ * a `String`, con `.name`) y una de vuelta (`String` a enum, con
+ * `.valueOf(s)`) para poder guardarse y leerse de una columna de texto.
+ */
 class Converters {
     @TypeConverter fun fromRol(rol: RolUsuario): String = rol.name
     @TypeConverter fun toRol(s: String): RolUsuario = RolUsuario.valueOf(s)
