@@ -290,15 +290,31 @@ No hace falta ningún túnel: ambos emuladores comparten la misma máquina host,
 
 ### 📱 Módulo Phone
 
-| Login | Panel de Admin | Tienda (Cliente) |
+| Login | Registro | Panel de Admin |
 |---|---|---|
-| ![Login](evidencias/phone/phone_01_login.png) | ![Panel Admin](evidencias/phone/phone_02_admin_dashboard.png) | ![Tienda](evidencias/phone/phone_03_tienda.png) |
+| ![Login](evidencias/phone/phone_01_login.png) | ![Registro](evidencias/phone/phone_04_registro.png) | ![Panel Admin](evidencias/phone/phone_02_admin_dashboard.png) |
+
+| Tienda (Cliente) | Carrito | Mis Órdenes |
+|---|---|---|
+| ![Tienda](evidencias/phone/phone_03_tienda.png) | ![Carrito](evidencias/phone/phone_05_carrito.png) | ![Mis Órdenes](evidencias/phone/phone_06_mis_ordenes.png) |
+
+| Talleres (mapa) | Inventario (Admin) | Editar producto |
+|---|---|---|
+| ![Talleres](evidencias/phone/phone_07_talleres.png) | ![Inventario](evidencias/phone/phone_08_inventario.png) | ![Editar producto](evidencias/phone/phone_09_editar_producto.png) |
+
+| Usuarios (Admin) | Cámara — Fotografiar producto | Nuevo producto (con foto) |
+|---|---|---|
+| ![Usuarios](evidencias/phone/phone_10_usuarios.png) | ![Cámara](evidencias/phone/phone_11_camara_foto.png) | ![Nuevo producto](evidencias/phone/phone_12_nuevo_producto.png) |
 
 ### 📺 Módulo Android TV
 
 | Catálogo | Ventas | Talleres (mapa) |
 |---|---|---|
 | ![Catálogo](evidencias/tv/tv_01_productos.png) | ![Ventas](evidencias/tv/tv_02_ventas.png) | ![Mapa de talleres](evidencias/tv/tv_03_mapa.png) |
+
+| Alerta de compra grande (overlay) |
+|---|
+| ![Alerta de compra grande](evidencias/tv/tv_04_alerta_compra_grande.png) |
 
 ### ⌚ Módulo Wear OS
 
