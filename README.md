@@ -423,3 +423,8 @@ No hace falta ningún túnel: ambos emuladores comparten la misma máquina host,
 - [ ] Implementar paginación (Paging 3) para el catálogo grande
 - [ ] Agregar exportación de reportes de ventas en CSV
 - [ ] Corregir el `applicationId` del módulo `wear`
+
+
+### Documento Firmado
+<img width="988" height="1280" alt="image" src="https://github.com/user-attachments/assets/2122ee44-a271-4fcf-9c7e-483586c45df8" />
+<img width="972" height="1280" alt="image" src="https://github.com/user-attachments/assets/49f468e7-11d1-418e-b4c0-a70a24bfaff7" />
